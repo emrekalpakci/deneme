@@ -1,0 +1,15 @@
+{
+  "name": "yatirim-rehberi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Küçük yatırımcılar için Türkçe, ücretsiz yatırım rehberi (PWA).",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec \"tests/unit/*.test.js\"",
+    "probe": "node scripts/probe-sources.mjs"
+  },
+  "license": "UNLICENSED"
+}

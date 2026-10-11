@@ -1,0 +1,67 @@
+// Varlık listesi. Yeni varlık eklemek için bu listeye bir kayıt eklemek yeterlidir.
+//
+// NASIL YENİ VARLIK EKLENİR?
+// 1) Aşağıdaki listeye bir kayıt kopyalayıp değiştirin:
+//    - Metal için (ör. platin): kind: 'metal', symbol: 'XPT', unit: 'gram'
+//    - Kripto için (ör. Solana): kind: 'crypto', symbol: 'SOL', unit: 'adet'
+// 2) Kripto için Coinbase'de "SOL-USD" gibi bir çift olmalıdır; metal için gold-api.com
+//    sembolü desteklemelidir. Kaynak testi (Actions → "Kaynak testi") bunu doğrular.
+// 3) Bütçe planlayıcıdaki dağılım tabloları yeni varlığı otomatik içermez (pay 0 kalır).
+
+export const GRAMS_PER_TROY_OUNCE = '31.1035';
+
+export const ASSETS = Object.freeze([
+  {
+    id: 'gram-altin',
+    name: 'Gram Altın',
+    shortName: 'Altın',
+    kind: 'metal',
+    symbol: 'XAU',
+    unit: 'gram',
+    unitLabel: 'g',
+    qtyDecimals: 4,
+    defaults: { tp: '15', sl: '8' },
+  },
+  {
+    id: 'gram-gumus',
+    name: 'Gram Gümüş',
+    shortName: 'Gümüş',
+    kind: 'metal',
+    symbol: 'XAG',
+    unit: 'gram',
+    unitLabel: 'g',
+    qtyDecimals: 4,
+    defaults: { tp: '15', sl: '8' },
+  },
+  {
+    id: 'btc',
+    name: 'Bitcoin',
+    shortName: 'BTC',
+    kind: 'crypto',
+    symbol: 'BTC',
+    unit: 'adet',
+    unitLabel: 'BTC',
+    qtyDecimals: 8,
+    defaults: { tp: '30', sl: '15' },
+  },
+  {
+    id: 'eth',
+    name: 'Ethereum',
+    shortName: 'ETH',
+    kind: 'crypto',
+    symbol: 'ETH',
+    unit: 'adet',
+    unitLabel: 'ETH',
+    qtyDecimals: 8,
+    defaults: { tp: '30', sl: '15' },
+  },
+]);
+
+export const METAL_NOTE = 'Hesaplanan fiyat; kuyumcu ve banka fiyatından farklı olabilir.';
+
+export function getAsset(id) {
+  return ASSETS.find((a) => a.id === id) || null;
+}
+
+export const metals = () => ASSETS.filter((a) => a.kind === 'metal');
+export const cryptos = () => ASSETS.filter((a) => a.kind === 'crypto');

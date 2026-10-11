@@ -1,0 +1,42 @@
+# Kaynak testi: veri kaynaklarını GitHub sunucusundan dener.
+# Ham yanıtlar "probe" dalına kaydedilir (test örnekleri için).
+name: Kaynak testi
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths:
+      - 'scripts/probe-sources.mjs'
+      - 'scripts/lib/**'
+      - '.github/workflows/probe.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Kaynakları dene
+        run: node scripts/probe-sources.mjs
+      - name: Sonuçları "probe" dalına kaydet
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd probe-out
+          git init -q -b probe
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Kaynak testi $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" probe
