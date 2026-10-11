@@ -14,6 +14,7 @@ import { renderTest } from './views/test.js';
 import { renderNews } from './views/news.js';
 import { renderGlossary } from './views/glossary.js';
 import { openClaudeDialog } from './claude.js';
+import { syncNow, onSyncChange, tokenDaysLeft } from './sync.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -47,8 +48,8 @@ const ROUTES = {
   butce: () => renderBudget({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
   haberler: () => renderNews({ ...viewState(), rerender: () => render({ force: true }), loadNews }),
   daha: () => renderMore(),
-  durum: () => renderStatus(viewState()),
-  ayarlar: () => renderSettings({ theme: state.theme, setTheme }),
+  durum: () => renderStatus({ ...viewState(), rerender: () => render({ force: true }) }),
+  ayarlar: () => renderSettings({ theme: state.theme, setTheme, rerender: () => render({ force: true }) }),
   sozluk: () => renderGlossary(),
   hakkinda: () => renderAbout(),
   test: () => renderTest(viewState()),
@@ -101,6 +102,9 @@ function renderBanner() {
     msg = `${state.error || 'Bağlantı sorunu'}. Son kayıtlı veriler gösteriliyor (güncelleme: ${formatWhen(state.market?.generatedAt, state.now)}).`;
   } else if (state.market && ageHours(state.market.generatedAt, state.now) > 1.5) {
     msg = `Veriler ${formatWhen(state.market.generatedAt, state.now)} saatinden beri güncellenmedi. Ayrıntı: Daha fazla → Durum.`;
+  } else {
+    const days = tokenDaysLeft();
+    if (days !== null && days <= 14) msg = days < 0 ? 'GitHub token\'ının süresi doldu; portföy eşitlenmiyor. Ayarlar\'dan yeni token gir.' : `GitHub token\'ının süresi ${days} gün içinde doluyor. Ayarlar\'dan yenile.`;
   }
   el.hidden = !msg;
   el.className = error ? 'banner error' : 'banner';
@@ -137,14 +141,22 @@ window.addEventListener('hashchange', () => {
   document.getElementById('view').focus({ preventScroll: true });
   window.scrollTo(0, 0);
 });
-window.addEventListener('online', () => refresh());
+window.addEventListener('online', () => {
+  refresh();
+  syncNow();
+});
+// Eşitleme başka cihazdan yeni veri getirdiyse ekranı yenile (form doldururken bozmadan).
+onSyncChange((changed) => (changed ? render() : renderBanner()));
 window.addEventListener('offline', () => {
   state.fromCache = !!state.market;
   state.error = 'İnternet bağlantısı yok';
   render();
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') refresh();
+  if (document.visibilityState === 'visible') {
+    refresh();
+    syncNow();
+  }
 });
 setInterval(() => {
   if (document.visibilityState === 'visible' && navigator.onLine !== false) refreshLive();
@@ -156,3 +168,4 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 
 document.getElementById('view').appendChild(h('p', { class: 'placeholder' }, 'Yükleniyor…'));
 refresh();
+syncNow();

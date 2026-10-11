@@ -8,7 +8,8 @@ import { isUsable } from '../../core/datum.js';
 import { valueOn } from '../../core/series.js';
 import { valuePortfolio, validateTx, targetLevels, targetsFor, sortTx, unitPrice, newId } from '../../core/portfolio.js';
 import { positionSignals } from '../../core/signals.js';
-import { loadPortfolio, savePortfolio, downloadBackup, readBackup } from '../portfolio-store.js';
+import { loadPortfolio, savePortfolio, downloadBackup, readBackup, replaceWithBackup } from '../portfolio-store.js';
+import { getSyncConfig, getSyncStatus } from '../sync.js';
 
 const DISCLAIMER = 'Bu bilgilendirmedir, yatırım tavsiyesi değildir.';
 const todayTr = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date());
@@ -193,7 +194,7 @@ function targetsForm(portfolio, assetId, rerender) {
     if (!tp.ok || new Big(tp.value).lte('0') || new Big(tp.value).gt('1000')) st.errors.push('Kâr hedefi 0 ile 1000 arasında bir yüzde olmalı.');
     if (!sl.ok || new Big(sl.value).lte('0') || new Big(sl.value).gte('100')) st.errors.push('Zarar sınırı 0 ile 100 arasında bir yüzde olmalı.');
     if (!st.errors.length) {
-      portfolio.settings.targets[assetId] = { tp: tp.value, sl: sl.value };
+      portfolio.settings.targets[assetId] = { tp: tp.value, sl: sl.value, updatedAt: new Date().toISOString() };
       savePortfolio(portfolio);
       ui.editTargets = null;
       ui.message = { text: 'Hedefler kaydedildi.' };
@@ -472,7 +473,7 @@ function backupCard(portfolio, rerender) {
       const { portfolio: p, errors } = await readBackup(file);
       if (errors.length) ui.message = { text: `Yedek yüklenemedi: ${errors.slice(0, 3).join(' ')}`, error: true };
       else if (confirm('Yedekteki portföy, telefondaki portföyün yerine geçecek. Devam edilsin mi?')) {
-        savePortfolio(p);
+        savePortfolio(replaceWithBackup(portfolio, p));
         ui.message = { text: 'Yedek yüklendi.' };
       }
       rerender();
@@ -482,11 +483,7 @@ function backupCard(portfolio, rerender) {
     'section',
     { class: 'card', 'aria-label': 'Yedek' },
     h('h2', {}, 'Yedek'),
-    h(
-      'p',
-      { class: 'meta' },
-      'Portföyün şimdilik sadece bu telefonda saklanıyor. Telefon değişirse ya da tarayıcı verileri silinirse kaybolabilir. Ara sıra yedek indir. (6. adımda gizli GitHub deponla otomatik eşitleme gelecek.)',
-    ),
+    syncNote(),
     h(
       'div',
       { class: 'row' },
@@ -494,5 +491,28 @@ function backupCard(portfolio, rerender) {
       h('button', { class: 'btn', type: 'button', onclick: () => fileInput.click() }, 'Yedekten yükle'),
       fileInput,
     ),
+  );
+}
+
+function syncNote() {
+  const cfg = getSyncConfig();
+  if (!cfg) {
+    return h(
+      'p',
+      { class: 'meta' },
+      'Portföyün sadece bu telefonda saklanıyor. Telefon değişirse ya da tarayıcı verileri silinirse kaybolabilir. ',
+      h('a', { href: '#/ayarlar' }, 'Ayarlar → Portföy eşitleme'),
+      ' ile gizli GitHub deponla eşitlemeyi aç ya da ara sıra yedek indir.',
+    );
+  }
+  const st = getSyncStatus();
+  return h(
+    'p',
+    { class: st && !st.ok ? 'unavailable' : 'meta' },
+    st?.ok
+      ? `Portföyün gizli deponla (${cfg.repo}) eşitleniyor. Son eşitleme: ${formatWhen(st.at)}. Bildirim görevi de bu veriyi kullanır.`
+      : st
+        ? `Eşitleme hatası: ${st.error} Değişikliklerin telefonda duruyor; bağlantı düzelince gönderilir.`
+        : `Portföyün gizli deponla (${cfg.repo}) eşitleniyor.`,
   );
 }

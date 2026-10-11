@@ -1,0 +1,70 @@
+# Bildirim görevi: 30 dakikada bir portföyünü güncel fiyatlarla kontrol eder,
+# gerekirse Telegram'a yazar. Kod herkese açık "deneme" deposundan alınır;
+# portföyün, bot anahtarın ve bu görevin kayıtları sadece bu gizli depoda kalır.
+name: Bildirim
+
+on:
+  schedule:
+    - cron: '22,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      deneme:
+        description: 'Deneme uyarısı gönder (gerçek portföyün kullanılmaz)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bildirim
+  cancel-in-progress: false
+
+jobs:
+  kontrol:
+    runs-on: ubuntu-latest
+    # Ücretsiz aylık süreyi korumak için en fazla 2 dakika çalışır.
+    timeout-minutes: 2
+    steps:
+      - name: Gizli depoyu al
+        uses: actions/checkout@v5
+        with:
+          path: veri
+
+      - name: Uygulama kodunu al (açık depo)
+        uses: actions/checkout@v5
+        with:
+          repository: emrekalpakci/deneme
+          ref: main
+          path: kod
+          persist-credentials: false
+          sparse-checkout: |
+            site/js
+            scripts
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Kontrol et ve gerekirse Telegram'a yaz
+        env:
+          DATA_DIR: ${{ github.workspace }}/veri
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DENEME: ${{ inputs.deneme }}
+        run: node kod/scripts/alerts.mjs
+
+      - name: Durumu kaydet
+        if: always()
+        working-directory: veri
+        run: |
+          git add bildirim-durumu.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "Kaydedilecek değişiklik yok."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qm "Bildirim durumu"
+          for i in 1 2 3; do
+            if git push -q; then echo "Kaydedildi."; exit 0; fi
+            git pull -q --rebase
+          done
+          echo "::warning::Durum kaydedilemedi; bir sonraki çalıştırmada yeniden denenecek."

@@ -1,6 +1,7 @@
 // "Daha fazla" menüsü, Ayarlar, Hakkında ve henüz hazır olmayan bölümler.
 
 import { h } from '../dom.js';
+import { renderSyncSettings } from './sync-settings.js';
 
 export function renderMore() {
   const link = (href, label, note) =>
@@ -14,14 +15,14 @@ export function renderMore() {
       { class: 'card menu' },
       link('#/test', 'Strateji testi', 'geçmiş başarı ›'),
       link('#/durum', 'Durum', 'veri ve kaynaklar ›'),
-      link('#/ayarlar', 'Ayarlar', 'tema ›'),
+      link('#/ayarlar', 'Ayarlar', 'tema, eşitleme, Telegram ›'),
       link('#/sozluk', 'Sözlük', 'terimler ›'),
       link('#/hakkinda', 'Hakkında', 'kaynaklar, uyarılar ›'),
     ),
   );
 }
 
-export function renderSettings({ theme, setTheme }) {
+export function renderSettings({ theme, setTheme, rerender }) {
   const options = [
     ['auto', 'Otomatik'],
     ['light', 'Açık'],
@@ -44,12 +45,7 @@ export function renderSettings({ theme, setTheme }) {
         ),
       ),
     ),
-    h(
-      'div',
-      { class: 'card' },
-      h('h2', {}, 'Portföy eşitleme ve Telegram'),
-      h('p', { class: 'meta' }, 'Bu ayarlar 6. adımda eklenecek.'),
-    ),
+    renderSyncSettings(rerender),
   );
 }
 
@@ -64,7 +60,7 @@ export function renderAbout() {
       { class: 'card' },
       h('p', {}, 'Bu uygulama kişisel kullanım içindir. Bilgilendirme amaçlıdır, yatırım tavsiyesi değildir.'),
       h('p', {}, 'Kesin kazanç yoktur. Fiyatlar düşebilir. Acil durum için ayırdığın parayı yatırma.'),
-      h('p', { class: 'meta' }, 'Kimseyi izlemez, reklam yoktur. Ayarların sadece bu telefonda saklanır.'),
+      h('p', { class: 'meta' }, 'Kimseyi izlemez, reklam yoktur. Ayarların ve GitHub token\'ın sadece bu telefonda saklanır; portföyün (eşitleme açıksa) sadece senin gizli GitHub deponda durur.'),
     ),
     h('h2', { class: 'section-title' }, 'Veri kaynakları (ücretsiz)'),
     h(
@@ -80,6 +76,8 @@ export function renderAbout() {
         src('currency-api', 'yedek günlük veri'),
         src('Coinbase, Bitstamp, Binance', 'kripto fiyatları'),
         src('CoinGecko', 'yedek kur'),
+        src('GitHub (gizli depo)', 'portföy eşitleme'),
+        src('Telegram', 'bildirimler'),
         src('TCMB', 'resmi günlük kur'),
         src('Habertürk, AA, NTV, Sözcü, Dünya, Bloomberg HT', 'haber başlıkları (RSS)'),
         src('CoinDesk, Cointelegraph, FXStreet', 'haber başlıkları (RSS)'),

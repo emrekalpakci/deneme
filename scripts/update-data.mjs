@@ -15,13 +15,12 @@ import { buildNews } from '../site/js/core/news.js';
 import { fetchAllFeeds } from './lib/news-feeds.mjs';
 import { isUsable } from '../site/js/core/datum.js';
 import { merge } from '../site/js/core/series.js';
-import { firstUsable, metalProviders, cryptoProviders, usdTryProviders } from './lib/fetchers.mjs';
+import { fetchLivePrices } from './lib/live.mjs';
 import { SERIES, refreshHistory, saveHistory, combined } from './lib/history.mjs';
 
 const VERI_DIR = process.env.VERI_DIR || 'veri';
 const SITE_DIR = process.env.SITE_DIR || 'site';
 const BUILD_ID = process.env.BUILD_ID || 'yerel';
-const JUMP = { metal: 0.15, crypto: 0.3, fx: 0.1 };
 
 const now = Date.now();
 const log = (...a) => console.log(...a);
@@ -41,22 +40,13 @@ for (const id of Object.keys(SERIES)) {
 const lastClose = (id) => combined(histories[id]).at(-1)?.[1];
 
 // 2) Canlı fiyatlar
-const guard = (ref, max) => (d) => !ref || Math.abs(d.v / ref - 1) <= max;
-const live = {};
-const sources = [];
-async function fetchLive(key, providers, ref, max) {
-  const r = await firstUsable(providers, { accept: guard(ref, max) });
-  live[key] = r.datum;
-  sources.push({ key, used: isUsable(r.datum) ? r.datum.src : null, confirmedBy: r.confirmedBy || null, attempts: r.attempts });
-  const att = r.attempts.map((a) => `${a.id}:${a.ok ? 'ok' : a.why}`).join(', ');
-  log(`Canlı ${key}: ${isUsable(r.datum) ? `${r.datum.v} (${r.datum.src})` : `YOK — ${r.datum.why}`} [${att}]`);
+const refs = Object.fromEntries([...ASSETS.map((a) => [a.symbol, lastClose(`${a.symbol}USD`)]), ['USDTRY', lastClose('USDTRY')]]);
+const { live, sources } = await fetchLivePrices(refs);
+for (const s of sources) {
+  const d = live[s.key];
+  const att = s.attempts.map((a) => `${a.id}:${a.ok ? 'ok' : a.why}`).join(', ');
+  log(`Canlı ${s.key}: ${isUsable(d) ? `${d.v} (${d.src})` : `YOK — ${d.why}`} [${att}]`);
 }
-
-for (const a of ASSETS) {
-  if (a.kind === 'metal') await fetchLive(a.symbol, metalProviders(a.symbol), lastClose(`${a.symbol}USD`), JUMP.metal);
-  else await fetchLive(a.symbol, cryptoProviders(a.symbol), lastClose(`${a.symbol}USD`), JUMP.crypto);
-}
-await fetchLive('USDTRY', usdTryProviders(), lastClose('USDTRY'), JUMP.fx);
 
 // 3) Metal kapanış kaydı: New York 17:00–18:00 arasındaki günlük arada fiyat sabittir;
 //    bu aradaki çalıştırma o günün kapanışını kendi kaydımız olarak saklar.

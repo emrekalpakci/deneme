@@ -1,0 +1,54 @@
+# Telegram kurulumu: elle bir kez çalıştırılır.
+# Bota /start yazan kişinin sohbet numarasını bulur, telegram.json'a kaydeder ve deneme mesajı gönderir.
+name: Telegram kurulumu
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Gizli depoyu al
+        uses: actions/checkout@v5
+        with:
+          path: veri
+
+      - name: Uygulama kodunu al (açık depo)
+        uses: actions/checkout@v5
+        with:
+          repository: emrekalpakci/deneme
+          ref: main
+          path: kod
+          persist-credentials: false
+          sparse-checkout: |
+            site/js
+            scripts
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Sohbeti bul ve deneme mesajı gönder
+        env:
+          DATA_DIR: ${{ github.workspace }}/veri
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: node kod/scripts/telegram-setup.mjs
+
+      - name: Kaydet
+        working-directory: veri
+        run: |
+          git add telegram.json
+          if git diff --cached --quiet; then echo "Değişiklik yok."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qm "Telegram kurulumu"
+          for i in 1 2 3; do
+            if git push -q; then echo "Kaydedildi."; exit 0; fi
+            git pull -q --rebase
+          done
+          exit 1

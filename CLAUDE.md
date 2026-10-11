@@ -25,13 +25,22 @@ Her değişiklikte aşağıdaki kurallara uy.
 - `indicators.js`, `scoring.js` (sabitler, `SCORING_VERSION`), `backtest.js`, `analysis.js`
 - `portfolio.js`, `signals.js` (satış sinyalleri), `budget.js`, `scenarios.js`
 - `news.js` (RSS ve haber puanı), `glossary.js`, `prompt.js` ("Claude'a sor" metni)
+- `sync.js` (gizli depoyla portföy eşitleme, birleştirme kuralları), `alerts.js` (Telegram uyarı kuralları ve tekrar önleme)
+
+## Gizli depo ve bildirimler
+- Kişisel veri sadece kullanıcının gizli deposunda (`yatirim-verilerim`): `portfoy.json`, `bildirim-durumu.json`, `telegram.json`.
+- O depodaki görevlerin şablonu `templates/private-repo/`; görevler bu açık depodaki `scripts/alerts.mjs`
+  ve `scripts/telegram-setup.mjs`'i çalıştırır. Şablon değişirse gizli depoya da kopyalanmalı.
+- `portfoy.json` biçimi değişirse (`PORTFOLIO_SCHEMA`) hem uygulama hem bildirim görevi birlikte güncellenmeli.
+- İşlemler asla silinmez, `deleted: true` işaretlenir (eşitleme bunu gerektirir).
 
 ## Yapı
 - `site/` → GitHub Pages'te yayınlanan uygulama. `site/js/core/` saf hesap modülleri
   (tarayıcı ve Node'da aynen çalışır), `site/js/ui/` ekranlar.
 - `scripts/` → GitHub Actions'ta çalışan Node 22 betikleri (veri çekme, kaynak testi).
 - `tests/unit/` → `npm test` (Node'un kendi test aracı, bağımlılık yok).
-- `.github/workflows/` → `ci.yml` (testler), `probe.yml` (kaynak testi).
+- `.github/workflows/` → `ci.yml` (testler), `data.yml` (30 dk'da bir veri ve yayın), `probe.yml` (kaynak testi).
+- `docs/KURULUM.md` → kullanıcı için Türkçe kurulum kılavuzu.
 
 ## Komutlar
 - Testler: `npm test`
