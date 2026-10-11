@@ -426,6 +426,17 @@ main {
   font: inherit;
   font-size: 1.05rem;
   font-weight: 500;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* iPhone Safari tarih kutusunu kartın dışına taşırmasın */
+.field input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  text-align: left;
 }
 
 .field input:focus,
