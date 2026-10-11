@@ -2,12 +2,13 @@
 
 import { h, clear } from './dom.js';
 import { load, save } from './store.js';
-import { loadMarket, fetchLivePrices } from './data.js';
+import { loadMarket, fetchLivePrices, loadHistory } from './data.js';
 import { applyLivePrices } from '../core/market.js';
 import { formatWhen, ageHours } from './format.js';
 import { renderMarket } from './views/market.js';
 import { renderStatus } from './views/status.js';
 import { renderMore, renderSettings, renderAbout, renderComingSoon } from './views/more.js';
+import { renderPortfolio, isPortfolioEditing } from './views/portfolio.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -30,14 +31,14 @@ function setTheme(theme) {
   state.theme = theme;
   save('theme', theme);
   applyTheme(theme);
-  render();
+  render({ force: true });
 }
 applyTheme(state.theme);
 
 // --- Yönlendirme ------------------------------------------------------------
 const ROUTES = {
   piyasa: () => renderMarket(viewState()),
-  portfoy: () => renderComingSoon('Portföy', 2, 'Alımlarını girip ortalama maliyet ve kâr/zararını görebileceksin.'),
+  portfoy: () => renderPortfolio({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
   butce: () => renderComingSoon('Bütçe planlayıcı', 3, 'Bütçene, vadene ve risk tercihine göre dağılım önerisi.'),
   haberler: () => renderComingSoon('Haberler', 5, 'RSS haber başlıkları ve olumlu/olumsuz puanı.'),
   daha: () => renderMore(),
@@ -58,8 +59,17 @@ function viewState() {
   return { ...state, market, reload: refresh };
 }
 
-function render() {
+/** Otomatik yenilemeler, kullanıcı form doldururken ekranı yeniden çizmez. */
+function isBusy() {
+  return currentRoute() === 'portfoy' && isPortfolioEditing();
+}
+
+function render({ force = false } = {}) {
   state.now = Date.now();
+  if (!force && isBusy()) {
+    renderBanner();
+    return;
+  }
   const route = currentRoute();
   const tab = TAB_OF[route] || route;
   for (const a of document.querySelectorAll('.tabbar a')) {
@@ -111,7 +121,7 @@ async function refreshLive(force = false) {
 
 document.getElementById('refresh').addEventListener('click', () => refresh({ forceLive: true }));
 window.addEventListener('hashchange', () => {
-  render();
+  render({ force: true });
   document.getElementById('view').focus({ preventScroll: true });
   window.scrollTo(0, 0);
 });
