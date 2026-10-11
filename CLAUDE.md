@@ -19,6 +19,13 @@ Her değişiklikte aşağıdaki kurallara uy.
    "Bu bilgilendirmedir, yatırım tavsiyesi değildir." notu kalır.
 8. **Dil.** Arayüz metinleri Türkçe, kısa ve jargonsuz.
 
+## Modüller (site/js/core)
+- `money.js` para ve Türkçe sayı; `datum.js` veri durumu; `assets.js` varlık listesi (yeni varlık burada)
+- `sources.js` kaynak ayrıştırıcıları; `series.js` günlük seriler; `market.js` piyasa özeti
+- `indicators.js`, `scoring.js` (sabitler, `SCORING_VERSION`), `backtest.js`, `analysis.js`
+- `portfolio.js`, `signals.js` (satış sinyalleri), `budget.js`, `scenarios.js`
+- `news.js` (RSS ve haber puanı), `glossary.js`, `prompt.js` ("Claude'a sor" metni)
+
 ## Yapı
 - `site/` → GitHub Pages'te yayınlanan uygulama. `site/js/core/` saf hesap modülleri
   (tarayıcı ve Node'da aynen çalışır), `site/js/ui/` ekranlar.
