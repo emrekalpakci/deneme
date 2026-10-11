@@ -222,7 +222,7 @@ function targetsForm(portfolio, assetId, rerender) {
 export function buildTxFromForm(f) {
   const errors = [];
   const asset = getAsset(f.asset);
-  const qty = parseTrNumber(f.qty, 'quantity');
+  const qty = parseTrNumber(f.qty, asset?.kind === 'fx' ? 'amount' : 'quantity'); // dövizde "1.000" bin demektir
   if (!qty.ok) errors.push(`Miktar: ${qty.error}`);
   const fee = f.fee === '' ? { ok: true, value: '0' } : parseTrNumber(f.fee, 'amount');
   if (!fee.ok) errors.push(`Komisyon: ${fee.error}`);

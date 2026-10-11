@@ -40,3 +40,13 @@ test('servis çalışanının önbelleğe aldığı her dosya gerçekten var', (
   assert.ok(files.length > 10);
   for (const f of files) assert.ok(existsSync(new URL(`../../site/${f}`, import.meta.url)), `eksik: ${f}`);
 });
+
+test('Euro miktarı: "1.000" bin euro demektir; ondalık virgülle', () => {
+  const a = buildTxFromForm({ ...base, asset: 'euro', qty: '1.000', price: '52,10' });
+  assert.equal(a.tx.qty, '1000');
+  assert.equal(a.tx.amountTry, '52100.00');
+  const b = buildTxFromForm({ ...base, asset: 'euro', qty: '250,50', price: '52,10' });
+  assert.equal(b.tx.qty, '250.5');
+  // Altında tek nokta hâlâ ondalık sayılır (2.5 g)
+  assert.equal(buildTxFromForm({ ...base, qty: '2.5', price: '6.646,19' }).tx.qty, '2.5');
+});
