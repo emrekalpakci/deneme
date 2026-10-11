@@ -16,9 +16,17 @@ export async function loadMarket() {
     return { data, fromCache: false, error: null };
   } catch (err) {
     const cached = load('market');
-    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-    return { data: cached, fromCache: !!cached, error: offline ? 'İnternet bağlantısı yok' : err.message || 'bilinmeyen hata' };
+    return { data: cached, fromCache: !!cached, error: describeLoadError(err) };
   }
+}
+
+/** Tarayıcının İngilizce hata metinleri yerine sade Türkçe açıklama. */
+export function describeLoadError(err) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return 'İnternet bağlantısı yok';
+  if (err?.name === 'TimeoutError' || err?.name === 'AbortError') return 'Sunucu zamanında yanıt vermedi';
+  if (err?.name === 'TypeError') return 'Sunucuya bağlanılamadı';
+  if (err instanceof SyntaxError) return 'Veri dosyası okunamadı';
+  return err?.message || 'Bilinmeyen hata';
 }
 
 let historyPromise = null;
