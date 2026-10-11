@@ -9,6 +9,7 @@ import { renderMarket } from './views/market.js';
 import { renderStatus } from './views/status.js';
 import { renderMore, renderSettings, renderAbout, renderComingSoon } from './views/more.js';
 import { renderPortfolio, isPortfolioEditing } from './views/portfolio.js';
+import { renderBudget } from './views/budget.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -39,7 +40,7 @@ applyTheme(state.theme);
 const ROUTES = {
   piyasa: () => renderMarket(viewState()),
   portfoy: () => renderPortfolio({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
-  butce: () => renderComingSoon('Bütçe planlayıcı', 3, 'Bütçene, vadene ve risk tercihine göre dağılım önerisi.'),
+  butce: () => renderBudget({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
   haberler: () => renderComingSoon('Haberler', 5, 'RSS haber başlıkları ve olumlu/olumsuz puanı.'),
   daha: () => renderMore(),
   durum: () => renderStatus(viewState()),
@@ -61,7 +62,9 @@ function viewState() {
 
 /** Otomatik yenilemeler, kullanıcı form doldururken ekranı yeniden çizmez. */
 function isBusy() {
-  return currentRoute() === 'portfoy' && isPortfolioEditing();
+  const el = document.activeElement;
+  const typing = el && ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) && el.closest('#view');
+  return !!typing || (currentRoute() === 'portfoy' && isPortfolioEditing());
 }
 
 function render({ force = false } = {}) {

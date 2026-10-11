@@ -15,6 +15,8 @@ import {
 
 export const HISTORY_START = '2016-01-01';
 export const HISTORY_SCHEMA = 1;
+/** Geçmiş çekme kodu değişince bu sayıyı artırın: arşiv o gün beklemeden yeniden çekilir. */
+export const FETCH_VERSION = 2;
 
 /** Tek günlük, komşularından çok farklı (sıçrama) değerleri ayıklar. */
 export function removeSpikes(points, maxJump) {
@@ -181,11 +183,13 @@ export async function refreshHistory(dir, id, now = Date.now(), { force = false 
     points: [],
     snapshots: [],
   };
-  if (!force && existing.refreshedDay === today && existing.points.length) return { history: existing, changed: false };
+  const upToDate = existing.refreshedDay === today && existing.fetchVersion === FETCH_VERSION;
+  if (!force && upToDate && existing.points.length) return { history: existing, changed: false };
   const fetched = await spec.fetch();
   const h = {
     ...existing,
     refreshedDay: today,
+    fetchVersion: FETCH_VERSION,
     updatedAt: new Date(now).toISOString(),
     sources: fetched.points.length ? fetched.sources : existing.sources,
     report: fetched.report,
