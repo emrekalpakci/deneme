@@ -78,9 +78,9 @@ export function renderInstall({ rerender }) {
         h(
           'div',
           { class: 'note warn' },
-          'iPhone\'da ana ekrandaki uygulama Safari\'den ayrı bir hafıza kullanır. Kurduktan sonra uygulamayı ana ekrandan aç ve ',
-          h('strong', {}, 'Ayarlar → Portföy eşitleme'),
-          ' bölümüne token\'ı bir kez daha yapıştır. Portföyün gizli deponda olduğu için kendiliğinden geri gelir.',
+          'iPhone\'da ana ekrandaki uygulama Safari\'deki ayarları görmez. Eklemeden önce burada ',
+          h('strong', {}, 'Ayarlar → Portföy eşitleme → Token\'ı kopyala'),
+          '\'ya bas. Sonra ana ekrandaki uygulamada aynı yere yapıştırıp "Kaydet ve bağlan" de. Portföyün gizli deponda olduğu için kendiliğinden gelir.',
         ),
       ),
       h(

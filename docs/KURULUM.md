@@ -28,9 +28,11 @@ Uygulamada **Daha fazla → Telefona kur** sayfası da aynı adımları gösteri
 1. Adresi **Safari**'de aç.
 2. Alttaki **Paylaş** düğmesine (yukarı ok çıkan kare) dokun.
 3. Listeyi kaydır → **Ana Ekrana Ekle** → sağ üstte **Ekle**.
-4. ⚠️ iPhone'da ana ekrandaki uygulama Safari'den **ayrı hafıza** kullanır. Uygulamayı ana
-   ekrandan aç, **Ayarlar → Portföy eşitleme**'ye token'ı bir kez daha yapıştır.
-   Portföyün gizli depodan kendiliğinden gelir.
+4. ⚠️ iPhone'da ana ekrandaki uygulama Safari'deki ayarları görmez. Token'ı taşımak için:
+   - Safari'de uygulamayı aç → **Daha fazla → Ayarlar → Portföy eşitleme → Token'ı kopyala**.
+   - Ana ekrandaki **Yatırım** simgesine dokun → **Daha fazla → Ayarlar → Portföy eşitleme**.
+   - **GitHub token** kutusuna parmağını basılı tut → **Yapıştır** → **Kaydet ve bağlan**.
+   - Portföyün gizli depodan kendiliğinden gelir.
 
 Güncellemeler kendiliğinden gelir; yeniden kurman gerekmez. İnternet yokken uygulama son
 kaydedilen fiyatları ve portföyünü gösterir.

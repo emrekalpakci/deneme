@@ -4,6 +4,7 @@ import { h } from '../dom.js';
 import { formatWhen, formatDay } from '../format.js';
 import { getSyncConfig, getSyncStatus, connect, disconnect, syncNow, defaultRepo, defaultExpiry, tokenDaysLeft, loadAlertStatus } from '../sync.js';
 import { loadPortfolio, savePortfolio } from '../portfolio-store.js';
+import { isStandalone } from './install.js';
 
 const form = { repo: '', token: '', expires: '', busy: false, message: null };
 const GUIDE_URL = 'https://github.com/emrekalpakci/deneme/blob/main/docs/KURULUM.md';
@@ -82,6 +83,15 @@ function connectedCard(cfg, rerender) {
     form.message = { text: 'Eşitleme kapatıldı. Token bu telefondan silindi.' };
     rerender();
   };
+  const copyToken = async () => {
+    try {
+      await navigator.clipboard.writeText(cfg.token);
+      form.message = { text: 'Token kopyalandı. Şimdi ana ekrandaki uygulamayı aç: Daha fazla → Ayarlar → Portföy eşitleme → token kutusuna basılı tut → Yapıştır → Kaydet ve bağlan.' };
+    } catch {
+      window.prompt('Token\'ı seçip kopyala:', cfg.token);
+    }
+    rerender();
+  };
   return h(
     'div',
     { class: 'card' },
@@ -104,6 +114,14 @@ function connectedCard(cfg, rerender) {
       h('button', { class: 'btn btn-primary', type: 'button', disabled: form.busy, onclick: run }, form.busy ? 'Eşitleniyor…' : 'Şimdi eşitle'),
       h('button', { class: 'btn', type: 'button', onclick: off }, 'Eşitlemeyi kapat'),
     ),
+    isStandalone()
+      ? null
+      : h(
+          'div',
+          { class: 'note' },
+          h('p', {}, 'iPhone\'da ana ekrana eklediğin uygulama, Safari\'deki ayarları görmez. Token\'ı oraya taşımak için:'),
+          h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: copyToken }, 'Token\'ı kopyala')),
+        ),
   );
 }
 
