@@ -7,6 +7,7 @@ import { ASSETS, getAsset } from '../../core/assets.js';
 import { isUsable } from '../../core/datum.js';
 import { valueOn } from '../../core/series.js';
 import { valuePortfolio, validateTx, targetLevels, targetsFor, sortTx, unitPrice, newId } from '../../core/portfolio.js';
+import { positionSignals } from '../../core/signals.js';
 import { loadPortfolio, savePortfolio, downloadBackup, readBackup } from '../portfolio-store.js';
 
 const DISCLAIMER = 'Bu bilgilendirmedir, yatırım tavsiyesi değildir.';
@@ -150,7 +151,20 @@ function positionCard(r, portfolio, ctx, rerender) {
       ),
     );
   }
-  children.push(h('p', { class: 'meta' }, 'Satış sinyalleri (hedefe ya da sınıra yaklaşınca öneri) 4. adımda eklenecek.'));
+  const m = ctx.market?.assets?.[r.asset];
+  const { signals } = positionSignals({
+    avgCost: r.avgCost,
+    price: isUsable(r.price) ? r.price.v : null,
+    tp: t.tp,
+    sl: t.sl,
+    events: m?.analysis?.events || [],
+  });
+  if (!isUsable(r.price)) children.push(h('p', { class: 'meta' }, 'Fiyat alınamadığı için satış sinyali hesaplanamadı.'));
+  else if (!signals.length) children.push(h('p', { class: 'meta' }, 'Şu an satış sinyali yok: kâr hedefi, zarar sınırı ve trend açısından bir uyarı bulunmuyor.'));
+  for (const sg of signals) {
+    children.push(h('div', { class: `signal ${sg.level}` }, h('strong', {}, sg.title), h('div', {}, sg.text)));
+  }
+  if (signals.length) children.push(h('p', { class: 'meta' }, 'Bu bilgilendirmedir, yatırım tavsiyesi değildir. Karar senin.'));
   return h('section', { class: 'card', 'aria-label': a.name }, children);
 }
 

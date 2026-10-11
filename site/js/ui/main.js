@@ -10,6 +10,7 @@ import { renderStatus } from './views/status.js';
 import { renderMore, renderSettings, renderAbout, renderComingSoon } from './views/more.js';
 import { renderPortfolio, isPortfolioEditing } from './views/portfolio.js';
 import { renderBudget } from './views/budget.js';
+import { renderTest } from './views/test.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -47,8 +48,9 @@ const ROUTES = {
   ayarlar: () => renderSettings({ theme: state.theme, setTheme }),
   sozluk: () => renderComingSoon('Sözlük', 5),
   hakkinda: () => renderAbout(),
+  test: () => renderTest(viewState()),
 };
-const TAB_OF = { durum: 'daha', ayarlar: 'daha', sozluk: 'daha', hakkinda: 'daha' };
+const TAB_OF = { durum: 'daha', ayarlar: 'daha', sozluk: 'daha', hakkinda: 'daha', test: 'daha' };
 
 function currentRoute() {
   const r = location.hash.replace(/^#\/?/, '').split('?')[0];

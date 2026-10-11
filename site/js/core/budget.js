@@ -133,3 +133,13 @@ export function horizonNote(horizon) {
 export function assetName(id) {
   return id === CASH ? 'Nakit (TL)' : getAsset(id)?.name || id;
 }
+
+/**
+ * Analizden bütçe ayarı için etiket: payı artırmak için güven en az "orta" olmalı
+ * (geçmiş testte kanıtı zayıf sinyalle risk artırılmaz). Riski azaltan "pahalı" her zaman uygulanır.
+ */
+export function tiltLabel(analysis) {
+  if (!analysis) return 'none';
+  if (analysis.label === 'buy' && analysis.confidence?.level === 'low') return 'wait';
+  return analysis.label;
+}

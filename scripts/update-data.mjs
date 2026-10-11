@@ -10,6 +10,7 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ASSETS } from '../site/js/core/assets.js';
 import { buildMarket, tradingDate } from '../site/js/core/market.js';
+import { analyzeMarket } from '../site/js/core/analysis.js';
 import { isUsable } from '../site/js/core/datum.js';
 import { merge } from '../site/js/core/series.js';
 import { firstUsable, metalProviders, cryptoProviders, usdTryProviders } from './lib/fetchers.mjs';
@@ -75,6 +76,12 @@ if (nyHour === 17 && !['Sat', 'Sun'].includes(nyWeekday)) {
 // 4) Çıktılar
 const series = Object.fromEntries(Object.keys(SERIES).map((id) => [id, combined(histories[id])]));
 const market = buildMarket({ now, live, history: series, sources, buildId: BUILD_ID });
+analyzeMarket(market, series);
+for (const a of ASSETS) {
+  const an = market.assets[a.id].analysis;
+  const bt = market.assets[a.id].backtest;
+  log(`Analiz ${a.id}: ${an.labelText} (puan ${an.total}, güven ${an.confidence?.text || '-'}); geçmiş test alım isabeti ${bt.available ? `${(bt.buy.hit * 100).toFixed(1)}% / taban ${(bt.baseline.up * 100).toFixed(1)}%` : 'yok'}`);
+}
 await mkdir(join(SITE_DIR, 'data'), { recursive: true });
 await writeFile(join(SITE_DIR, 'data', 'market.json'), `${JSON.stringify(market)}\n`);
 const historyOut = {

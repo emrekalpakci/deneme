@@ -12,6 +12,7 @@ export function renderMore() {
     h(
       'nav',
       { class: 'card menu' },
+      link('#/test', 'Strateji testi', 'geçmiş başarı ›'),
       link('#/durum', 'Durum', 'veri ve kaynaklar ›'),
       link('#/ayarlar', 'Ayarlar', 'tema ›'),
       link('#/sozluk', 'Sözlük', '5. adımda'),

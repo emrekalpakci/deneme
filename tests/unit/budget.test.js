@@ -169,3 +169,12 @@ test('dolar bazına çevirme: TL artışı sadece kurdan geliyorsa dolar getiris
   assert.ok(Math.abs(usd.mid) < 1e-9);
   assert.ok(Math.abs(bench.mid - tl.mid) < 1e-9);
 });
+
+test('bütçe ayarı: düşük güvenli "alım" payı artırmaz, "pahalı" her zaman azaltır', async () => {
+  const { tiltLabel } = await import('../../site/js/core/budget.js');
+  assert.equal(tiltLabel({ label: 'buy', confidence: { level: 'low' } }), 'wait');
+  assert.equal(tiltLabel({ label: 'buy', confidence: { level: 'medium' } }), 'buy');
+  assert.equal(tiltLabel({ label: 'expensive', confidence: { level: 'low' } }), 'expensive');
+  assert.equal(tiltLabel({ label: 'none', confidence: null }), 'none');
+  assert.equal(tiltLabel(null), 'none');
+});

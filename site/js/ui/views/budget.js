@@ -9,7 +9,9 @@ import {
   CASH,
   PLAN_ASSETS,
   LIMITS,
+  BASE,
   targetWeights,
+  tiltLabel,
   allocate,
   monthlyPlan,
   REASONS,
@@ -154,6 +156,17 @@ function formCard(ctx) {
 
 const RISK_TR = { low: 'düşük', medium: 'orta', high: 'yüksek' };
 
+const BASE_PCT = (s, a) => BASE[s.horizon][s.risk][a];
+
+function tiltText(asset, label, analysis) {
+  const name = getAsset(asset).name;
+  if (analysis?.label === 'buy' && label === 'wait') return `${name} "Alım için uygun" görünüyor ama güven düşük olduğu için payı artırılmadı.`;
+  if (label === 'buy') return `${name} "Alım için uygun" göründüğü için payı biraz artırıldı.`;
+  if (label === 'expensive') return `${name} "Pahalı görünüyor" olduğu için payı azaltıldı.`;
+  if (label === 'none') return `${name} için güncel analiz yapılamadığından (veri yetersiz) plana alınmadı.`;
+  return null;
+}
+
 /** Tam sayı tutarlarda kuruş gösterilmez: "27.500 TL". */
 function tryShort(x) {
   return x.round(0).eq(x) ? `${formatDecimal(x, 0)} TL` : formatTry(x);
@@ -162,7 +175,12 @@ function tryShort(x) {
 function resultCards(ctx, s) {
   const prices = Object.fromEntries(PLAN_ASSETS.map((a) => [a, ctx.market?.assets?.[a]?.try]));
   const available = Object.fromEntries(PLAN_ASSETS.map((a) => [a, isUsable(prices[a])]));
-  const { weights, notes } = targetWeights({ horizon: s.horizon, risk: s.risk, available });
+  const analyses = Object.fromEntries(PLAN_ASSETS.map((a) => [a, ctx.market?.assets?.[a]?.analysis]));
+  const labels = Object.fromEntries(PLAN_ASSETS.map((a) => [a, tiltLabel(analyses[a])]));
+  const { weights, notes } = targetWeights({ horizon: s.horizon, risk: s.risk, available, labels });
+  const tiltNotes = PLAN_ASSETS.filter((a) => available[a] && BASE_PCT(s, a) > 0)
+    .map((a) => tiltText(a, labels[a], analyses[a]))
+    .filter(Boolean);
   const alloc = allocate(s.budget, weights);
   const B = alloc.budget;
 
@@ -214,7 +232,9 @@ function resultCards(ctx, s) {
         h('div', {}, '• Tutarlar kolay alım için yuvarlandı; küçük artıklar nakitte bırakıldı.'),
         h('div', {}, '• Alım-satım farkı (makas) ve komisyon nedeniyle aldığın miktar biraz farklı olabilir.'),
       ),
-      h('p', { class: 'meta' }, 'Güncel piyasa durumuna göre ayar (alım için uygun / pahalı) 4. adımda eklenecek.'),
+      tiltNotes.length
+        ? h('div', { class: 'note' }, h('strong', {}, 'Güncel duruma göre ayar: '), tiltNotes.join(' '))
+        : h('p', { class: 'meta' }, 'Güncel analizde payları değiştiren bir durum yok (hepsi "Bekle").'),
     ),
   ];
 

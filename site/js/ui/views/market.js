@@ -6,6 +6,7 @@ import { formatWhen, formatAge, formatDay } from '../format.js';
 import { formatTry, formatUsd, formatPercent, formatDecimal } from '../../core/money.js';
 import { ASSETS, METAL_NOTE } from '../../core/assets.js';
 import { isUsable } from '../../core/datum.js';
+import { insightBox } from './insight.js';
 
 const DISCLAIMER = 'Bu bilgilendirmedir, yatırım tavsiyesi değildir.';
 const LIVE_PILL_MAX_AGE_MS = 3 * 60 * 1000;
@@ -21,7 +22,7 @@ export function renderMarket(state) {
       'p',
       { class: 'meta updated-line' },
       `Otomatik güncelleme: ${formatWhen(market.generatedAt, now)} (${formatAge(market.generatedAt, now)}). `,
-      'Veriler 30 dakikada bir yenilenir; uygulama açıkken ons ve kripto fiyatları dakikada bir yenilenir.',
+      'Veriler 30 dakikada bir yenilenir; uygulama açıkken ons ve kripto fiyatları dakikada bir yenilenir. Analiz, otomatik güncellemedeki fiyatla yapılır.',
     ),
     fxCard(fx, now),
     ASSETS.map((a) => assetCard(a, market.assets?.[a.id], fx, now)),
@@ -104,6 +105,8 @@ function assetCard(asset, a, fx, now) {
       : `${formatUsd(String(usd.v))}`;
     children.push(h('div', { class: 'price-sub' }, sub, a.change?.usdPct !== null && a.change?.usdPct !== undefined ? ` (${formatPercent(String(a.change.usdPct), 2, { signed: true })} USD)` : ''));
   }
+
+  children.push(insightBox(asset, a, null));
 
   const chart = sparkline(a.spark?.try, { label: `${asset.name} son 30 gün (TL)` });
   if (chart) children.push(chart);
