@@ -98,18 +98,27 @@ const ASSET_RULES = {
   'gram-gumus': (w) => starts(w, 'gümüş', 'gumus') || ['silver', 'xag'].includes(w),
   btc: (w) => starts(w, 'bitcoin') || w === 'btc',
   eth: (w) => starts(w, 'ethereum') || ['eth', 'ether'].includes(w),
+  euro: (w) => EURO_WORDS.has(w),
 };
+// "Euro" spor (Euro 2028), Avrupa haberleri vb. için de geçer: sadece kur/para bağlamında sayılır.
+const EURO_WORDS = new Set(['euro', 'euroda', 'eurodan', 'euronun', 'euroya', 'euroyu', 'avro', 'avroda', 'avrodan', 'avronun', 'avroya', 'avroyu', 'eur', 'eurusd', 'eurtry', 'ecb']);
+const EURO_STRONG = new Set(['eurusd', 'eurtry', 'ecb']);
+const FX_EN = ['dollar', 'currency', 'currencies', 'forex', 'fx', 'ecb', 'lagarde', 'parity', 'rate', 'rates', 'inflation', 'greenback'];
 const cryptoGeneral = (w) => starts(w, 'kripto') || ['crypto', 'cryptocurrency', 'cryptocurrencies'].includes(w);
 
 // Türkçe "altın/gümüş" mecaz da olabilir ("altın çocuk", "gümüş madalya"); bu kelimelerle eşleşen
 // başlıkta ayrıca bir piyasa/ekonomi kelimesi aranır.
 const FINANCE = ['fiyat', 'gram', 'ons', 'çeyrek', 'piyasa', 'yatırım', 'dolar', 'borsa', 'kur', 'rekor', 'yüksel', 'düş', 'geril',
   'değer', 'merkez', 'fed', 'emtia', 'kıymetli', 'satış', 'alış', 'faiz', 'enflasyon', 'tl', 'lira', 'kilogram', 'ithalat', 'ihracat', 'rezerv'];
-const needsContext = { 'gram-altin': (w) => starts(w, 'altın', 'altin'), 'gram-gumus': (w) => starts(w, 'gümüş', 'gumus') };
+const needsContext = {
+  'gram-altin': (w) => starts(w, 'altın', 'altin'),
+  'gram-gumus': (w) => starts(w, 'gümüş', 'gumus'),
+  euro: (w) => !EURO_STRONG.has(w),
+};
 
 export function tagAssets(title) {
   const ws = tokens(title);
-  const hasFinance = ws.some((w) => FINANCE.some((f) => w.startsWith(f))) || /[%$₺]/.test(title);
+  const hasFinance = ws.some((w) => FINANCE.some((f) => w.startsWith(f)) || FX_EN.includes(w)) || /[%$₺€]/.test(title) || /EUR\/USD|EUR\/TRY/i.test(title);
   const tags = Object.keys(ASSET_RULES).filter((id) => {
     const hits = ws.filter(ASSET_RULES[id]);
     if (!hits.length) return false;
@@ -117,6 +126,7 @@ export function tagAssets(title) {
     return !onlyTurkish || hasFinance;
   });
   if (!tags.includes('btc') && !tags.includes('eth') && ws.some(cryptoGeneral)) tags.push('btc', 'eth');
+  if (!tags.includes('euro') && /avrupa merkez bankas|european central bank/.test(lowerTr(title))) tags.push('euro');
   return tags;
 }
 

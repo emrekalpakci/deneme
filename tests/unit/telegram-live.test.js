@@ -58,7 +58,7 @@ test('canlı fiyat: kaynaklar paralel; süre dolunca bitmeyen "yok" sayılır, u
   const t = new Date().toISOString();
   const quick = (v) => [{ id: 'hizli', run: async () => ({ datum: okDatum(v, t, 'hızlı'), ms: 1 }) }];
   const never = [{ id: 'yavas', run: () => new Promise(() => {}) }];
-  const providers = { metal: (s) => (s === 'XAU' ? quick(4000) : never), crypto: () => quick(80000), fx: () => quick(40) };
+  const providers = { metal: (s) => (s === 'XAU' ? quick(4000) : never), crypto: () => quick(80000), currency: () => quick(1.08), fx: () => quick(40) };
   const started = Date.now();
   const { live, sources } = await fetchLivePrices({}, { providers, deadlineMs: 50 });
   assert.ok(Date.now() - started < 1000);
@@ -75,7 +75,7 @@ test('canlı fiyat: kayıtlı fiyattan çok farklı değer ikinci kaynakla doğr
     { id: 'a', run: async () => ({ datum: okDatum(a, t, 'A'), ms: 1 }) },
     { id: 'b', run: async () => ({ datum: b === null ? unavailable('B', 'yok') : okDatum(b, t, 'B'), ms: 1 }) },
   ];
-  const providers = { metal: () => two(6000, null), crypto: () => two(80000, 80100), fx: () => two(40, 40) };
+  const providers = { metal: () => two(6000, null), crypto: () => two(80000, 80100), currency: () => two(1.08, 1.081), fx: () => two(40, 40) };
   const { live } = await fetchLivePrices({ XAU: 4000, XAG: 4000, BTC: 50000 }, { providers });
   assert.equal(live.XAU.st, 'unavailable', '%50 sıçrama, ikinci kaynak yok');
   assert.equal(live.BTC.v, 80000, '%60 sıçrama ama ikinci kaynak %2 içinde doğruladı');

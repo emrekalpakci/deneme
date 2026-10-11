@@ -6,7 +6,7 @@ import { addDays } from './series.js';
 
 export const HORIZON_DAYS = 90;
 /** Al-sat başına toplam maliyet varsayımı (makas + komisyon). */
-export const ROUND_TRIP_COST = Object.freeze({ metal: 0.01, crypto: 0.004 });
+export const ROUND_TRIP_COST = Object.freeze({ metal: 0.01, crypto: 0.004, fx: 0.01 });
 
 /** Wilson %95 güven aralığı (başarı oranı için). */
 export function wilson(hits, n, z = 1.96) {
@@ -132,7 +132,7 @@ function timingVsHold(values, labels, trend, start, cost) {
 
 /**
  * @param {[string, number][]} points  kapanmış günlerin USD fiyatları (bugünkü geçici fiyat hariç)
- * @param {'metal'|'crypto'} kind
+ * @param {'metal'|'crypto'|'fx'} kind
  */
 export function backtestAsset(points, kind) {
   const dates = points.map((p) => p[0]);

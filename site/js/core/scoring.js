@@ -180,9 +180,9 @@ const CLOSING = {
 };
 
 export function riskNote(kind) {
-  return kind === 'crypto'
-    ? 'Kripto paralar kısa sürede çok sert düşebilir; kaybetmeyi göze alamayacağın parayla alma.'
-    : 'Altın ve gümüş de kısa vadede düşebilir; kısa vadeli kazanç garantisi yoktur.';
+  if (kind === 'crypto') return 'Kripto paralar kısa sürede çok sert düşebilir; kaybetmeyi göze alamayacağın parayla alma.';
+  if (kind === 'fx') return 'Euro\'nun TL değeri hem euro/dolar paritesine hem dolar kuruna bağlıdır; döviz de değer kaybedebilir.';
+  return 'Altın ve gümüş de kısa vadede düşebilir; kısa vadeli kazanç garantisi yoktur.';
 }
 
 /** En çok etki eden iki faktörün cümlesi + sonuç cümlesi (2–3 cümle). */

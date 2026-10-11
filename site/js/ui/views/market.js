@@ -4,7 +4,7 @@ import { h } from '../dom.js';
 import { sparkline } from '../chart.js';
 import { formatWhen, formatAge, formatDay } from '../format.js';
 import { formatTry, formatUsd, formatPercent, formatDecimal } from '../../core/money.js';
-import { ASSETS, METAL_NOTE } from '../../core/assets.js';
+import { ASSETS, METAL_NOTE, priceDecimals } from '../../core/assets.js';
 import { isUsable } from '../../core/datum.js';
 import { insightBox } from './insight.js';
 
@@ -84,26 +84,37 @@ function assetCard(asset, a, fx, now) {
     return h('section', { class: 'card' }, h('h2', {}, asset.name), h('p', { class: 'unavailable' }, 'Bu varlık için veri yok.'));
   }
   const metal = asset.kind === 'metal';
+  const fxKind = asset.kind === 'fx';
   const tl = a.try;
   const usd = a.usd;
-  const unitWord = metal ? 'gram' : '1 adet';
+  const dp = priceDecimals(asset);
+  const unitWord = metal ? 'gram' : fxKind ? `1 ${asset.unitLabel}` : '1 adet';
   const children = [
     h('div', { class: 'asset-head' }, h('h2', {}, asset.name), statusPill(metal ? a.ounceUsd : usd, { marketOpen: a.marketOpen, live: a.live, now })),
   ];
 
   if (isUsable(tl)) {
-    children.push(h('div', { class: 'price-main', 'aria-label': `${asset.name} ${unitWord} fiyatı` }, formatTry(String(tl.v))));
+    children.push(h('div', { class: 'price-main', 'aria-label': `${asset.name} ${unitWord} fiyatı` }, formatTry(String(tl.v), dp)));
     children.push(changeLine(a.change?.tryPct, 'önceki kapanışa göre (TL)'));
   } else {
     const why = isUsable(usd) ? 'Dolar/TL kuru alınamadığı için TL fiyatı hesaplanamadı.' : 'Bu varlığın fiyatı şu an alınamadı.';
     children.push(h('p', { class: 'unavailable' }, why));
   }
 
-  if (isUsable(usd)) {
-    const sub = metal
-      ? `${formatUsd(String(usd.v))} / gram · Ons ${formatUsd(String(a.ounceUsd.v))}`
-      : `${formatUsd(String(usd.v))}`;
-    children.push(h('div', { class: 'price-sub' }, sub, a.change?.usdPct !== null && a.change?.usdPct !== undefined ? ` (${formatPercent(String(a.change.usdPct), 2, { signed: true })} USD)` : ''));
+  const usdPct = a.change?.usdPct !== null && a.change?.usdPct !== undefined ? ` (${formatPercent(String(a.change.usdPct), 2, { signed: true })})` : '';
+  if (isUsable(usd) && metal) {
+    children.push(h('div', { class: 'price-sub' }, `${formatUsd(String(usd.v))} / gram · Ons ${formatUsd(String(a.ounceUsd.v))}`, usdPct ? `${usdPct} USD` : ''));
+  } else if (isUsable(usd)) {
+    // Kripto ve dövizde dolar fiyatı da büyük gösterilir.
+    children.push(
+      h(
+        'div',
+        { class: 'price-usd', 'aria-label': `${asset.name} dolar fiyatı` },
+        h('span', { class: 'label' }, fxKind ? `1 ${asset.unitLabel} = ` : 'Dolar: '),
+        formatUsd(String(usd.v), dp),
+        h('span', { class: 'meta' }, usdPct),
+      ),
+    );
   }
 
   children.push(insightBox(asset, a, null));
@@ -115,10 +126,11 @@ function assetCard(asset, a, fx, now) {
     h(
       'div',
       { class: 'meta' },
-      sourceLine(metal ? 'Ons fiyatı' : 'Fiyat', metal ? a.ounceUsd : usd, now, a.live ? true : a.marketOpen),
+      sourceLine(metal ? 'Ons fiyatı' : fxKind ? 'Euro/Dolar' : 'Fiyat', metal ? a.ounceUsd : usd, now, a.live ? true : a.marketOpen),
       isUsable(fx) && isUsable(usd) ? sourceLine('Dolar/TL', fx, now, fx.marketOpen) : null,
     ),
   );
   if (metal) children.push(h('div', { class: 'note' }, `ⓘ ${METAL_NOTE} Formül: ons × Dolar/TL ÷ 31,1035.`));
+  if (fxKind) children.push(h('div', { class: 'note' }, 'ⓘ Hesaplanan kur: Euro/Dolar paritesi × Dolar/TL. Banka ve döviz bürosu alış-satış fiyatları farklıdır.'));
   return h('section', { class: 'card', 'aria-label': asset.name }, children);
 }

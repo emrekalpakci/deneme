@@ -4,6 +4,7 @@
 // 1) Aşağıdaki listeye bir kayıt kopyalayıp değiştirin:
 //    - Metal için (ör. platin): kind: 'metal', symbol: 'XPT', unit: 'gram'
 //    - Kripto için (ör. Solana): kind: 'crypto', symbol: 'SOL', unit: 'adet'
+//    - Döviz için (ör. sterlin): kind: 'fx', symbol: 'GBP' (fiyatı GBP/USD paritesi × Dolar/TL)
 // 2) Kripto için Coinbase'de "SOL-USD" gibi bir çift olmalıdır; metal için gold-api.com
 //    sembolü desteklemelidir. Kaynak testi (Actions → "Kaynak testi") bunu doğrular.
 // 3) Bütçe planlayıcıdaki dağılım tabloları yeni varlığı otomatik içermez (pay 0 kalır).
@@ -55,6 +56,19 @@ export const ASSETS = Object.freeze([
     qtyDecimals: 8,
     defaults: { tp: '30', sl: '15' },
   },
+  {
+    id: 'euro',
+    name: 'Euro',
+    shortName: 'Euro',
+    kind: 'fx',
+    symbol: 'EUR',
+    unit: 'euro',
+    unitLabel: '€',
+    qtyDecimals: 2,
+    priceDecimals: 4,
+    qtyExample: '500',
+    defaults: { tp: '10', sl: '5' },
+  },
 ]);
 
 export const METAL_NOTE = 'Hesaplanan fiyat; kuyumcu ve banka fiyatından farklı olabilir.';
@@ -65,3 +79,7 @@ export function getAsset(id) {
 
 export const metals = () => ASSETS.filter((a) => a.kind === 'metal');
 export const cryptos = () => ASSETS.filter((a) => a.kind === 'crypto');
+export const currencies = () => ASSETS.filter((a) => a.kind === 'fx');
+
+/** Fiyat gösterim hanesi: döviz 4 hane (49,2706 TL), diğerleri 2 hane. */
+export const priceDecimals = (asset) => asset?.priceDecimals ?? 2;

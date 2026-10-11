@@ -67,7 +67,7 @@ test('varlık listesi tutarlı', () => {
   const ids = new Set(ASSETS.map((a) => a.id));
   assert.equal(ids.size, ASSETS.length, 'kimlikler benzersiz olmalı');
   for (const a of ASSETS) {
-    assert.ok(['metal', 'crypto'].includes(a.kind));
+    assert.ok(['metal', 'crypto', 'fx'].includes(a.kind));
     assert.ok(Number.isInteger(a.qtyDecimals));
     assert.ok(new Big(a.defaults.tp).gt('0') && new Big(a.defaults.sl).gt('0'));
   }

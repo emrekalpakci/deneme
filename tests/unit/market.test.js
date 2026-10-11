@@ -40,6 +40,7 @@ function liveAt(ms, overrides = {}) {
     XAG: okDatum(60.95, t, 'gold-api.com'),
     BTC: okDatum(82900, t, 'Coinbase'),
     ETH: okDatum(2499, t, 'Coinbase'),
+    EUR: okDatum(1.0852, t, 'Swissquote'),
     USDTRY: okDatum(49.27, t, 'Swissquote'),
     ...overrides,
   };

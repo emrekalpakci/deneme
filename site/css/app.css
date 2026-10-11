@@ -792,3 +792,20 @@ dialog textarea {
   gap: 8px;
   line-height: 1.45;
 }
+
+/* Kripto ve dövizde dolar fiyatı (ikinci büyük rakam) */
+.price-usd {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin: 2px 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.price-usd .label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.price-usd .meta {
+  font-size: 0.9rem;
+  font-weight: 500;
+}

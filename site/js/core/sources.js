@@ -113,6 +113,7 @@ export function parseCoinGeckoRates(json, fetchedAt) {
     USDTRY: ratio(val('try'), usd),
     XAU: ratio(usd, val('xau')),
     XAG: ratio(usd, val('xag')),
+    EUR: ratio(usd, val('eur')),
   };
 }
 
@@ -148,6 +149,7 @@ export function parseCurrencyApi(json) {
     XAG: mk(inv('xag')),
     BTC: mk(inv('btc')),
     ETH: mk(inv('eth')),
+    EUR: mk(inv('eur')),
   };
 }
 

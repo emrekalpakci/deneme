@@ -100,6 +100,21 @@ export const SERIES = {
   },
   BTCUSD: cryptoSeries('BTC'),
   ETHUSD: cryptoSeries('ETH'),
+  EURUSD: {
+    unit: 'USD/EUR',
+    weekdaysOnly: true,
+    maxJump: 0.08,
+    async fetch() {
+      const f = await frankfurterSeries('EUR', 'USD', HISTORY_START);
+      const points = clean(f.points, this);
+      const check = await sampleCheck(points, 'EUR');
+      return {
+        points,
+        sources: 'Frankfurter (merkez bankaları)',
+        report: { frankfurter: f.points.length, currencyApiSample: check, errors: [f.why].filter(Boolean) },
+      };
+    },
+  },
 };
 
 /**

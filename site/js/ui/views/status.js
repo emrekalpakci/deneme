@@ -7,7 +7,7 @@ import { formatDecimal } from '../../core/money.js';
 import { getSyncConfig, getSyncStatus, tokenDaysLeft } from '../sync.js';
 import { alertStatusList } from './sync-settings.js';
 
-const KEY_NAMES = { XAU: 'Ons altın', XAG: 'Ons gümüş', BTC: 'Bitcoin', ETH: 'Ethereum', USDTRY: 'Dolar/TL' };
+const KEY_NAMES = { XAU: 'Ons altın', XAG: 'Ons gümüş', BTC: 'Bitcoin', ETH: 'Ethereum', EUR: 'Euro/Dolar', USDTRY: 'Dolar/TL' };
 const PROVIDER_NAMES = {
   goldapi: 'gold-api.com',
   swissquote: 'Swissquote',

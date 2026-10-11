@@ -56,11 +56,13 @@ async function getJson(url) {
   return res.json();
 }
 
-/** Ons altın/gümüş (gold-api.com) ve kripto (Coinbase) anlık fiyatları. Kapalı piyasada metal istenmez. */
+/** Ons altın/gümüş (gold-api.com) ve kripto (Coinbase) anlık fiyatları. Kapalı piyasada metal istenmez.
+ * Döviz (Euro) tarayıcıda canlı alınmaz; 30 dakikalık güncellemedeki değer kullanılır. */
 export async function fetchLivePrices(market, { force = false } = {}) {
   if (!force && Date.now() - lastLive.at < MIN_INTERVAL_MS) return lastLive.prices;
   lastLive = { at: Date.now(), prices: lastLive.prices };
   const jobs = ASSETS.map(async (a) => {
+    if (a.kind === 'fx') return null;
     if (a.kind === 'metal') {
       if (!market?.assets?.[a.id]?.marketOpen) return null;
       return [a.symbol, parseGoldApi(await getJson(`https://api.gold-api.com/price/${a.symbol}`), a.symbol)];

@@ -33,3 +33,11 @@ Puanlama sabitleri değişirse `SCORING_VERSION` artırılır ve buraya not dü�
 
 - "Alım için uygun" sadece güven en az "Orta" ise payı ×1,25 artırır (zayıf kanıtla risk artırılmaz).
 - "Pahalı görünüyor" payı her zaman ×0,75 azaltır; "Veri yetersiz" varlık plana alınmaz.
+
+## Euro (döviz) eklendi — 11 Ekim 2026
+- Euro, "döviz" (`fx`) türünde yatırım aracı olarak eklendi: portföy, analiz etiketi, geçmiş test ve Telegram uyarıları.
+- Fiyat: Euro/Dolar paritesi (Swissquote → CoinGecko → currency-api) × Dolar/TL. Geçmiş: Frankfurter (merkez bankaları) EUR→USD, 2016'dan beri.
+- Analiz diğer varlıklar gibi dolar fiyatı (parite) üzerinden yapılır; Dolar/TL trendi ayrı göstergedir. Puanlama sabitleri değişmedi (SCORING_VERSION 1).
+- Geçmiş testte al-sat maliyeti %1 (banka/döviz bürosu makası). Varsayılan hedefler: kâr +%10, zarar −%5 (döviz daha az oynak).
+- Bütçe planlayıcının dağılım tablosuna eklenmedi (payı 0); dağılım tablosu ayrıca karar gerektirir.
+- Haberlerde "euro/avro" ancak kur/para bağlamında sayılır (ör. "Euro 2028" spor haberi sayılmaz).

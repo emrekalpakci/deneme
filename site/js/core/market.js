@@ -150,7 +150,7 @@ function buildAsset(asset, { now, live, history, fxLive, fxHist }) {
 
 export { ST, combine };
 
-const LIVE_JUMP = { metal: 0.15, crypto: 0.3 };
+const LIVE_JUMP = { metal: 0.15, crypto: 0.3, fx: 0.1 };
 
 /**
  * Tarayıcıda anlık alınan fiyatları (ons/kripto USD) piyasa özetine uygular.

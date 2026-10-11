@@ -4,10 +4,10 @@
 
 import { ASSETS } from '../../site/js/core/assets.js';
 import { isUsable, unavailable } from '../../site/js/core/datum.js';
-import { firstUsable, metalProviders, cryptoProviders, usdTryProviders } from './fetchers.mjs';
+import { firstUsable, metalProviders, cryptoProviders, fxProviders, usdTryProviders } from './fetchers.mjs';
 
 export const JUMP = Object.freeze({ metal: 0.15, crypto: 0.3, fx: 0.1 });
-const DEFAULT_PROVIDERS = { metal: metalProviders, crypto: cryptoProviders, fx: usdTryProviders };
+const DEFAULT_PROVIDERS = { metal: metalProviders, crypto: cryptoProviders, currency: fxProviders, fx: usdTryProviders };
 
 /**
  * @param {Record<string, number|undefined>} refs  karşılaştırma fiyatları: { XAU, XAG, BTC, ETH, USDTRY }
@@ -18,7 +18,11 @@ const DEFAULT_PROVIDERS = { metal: metalProviders, crypto: cryptoProviders, fx: 
 export async function fetchLivePrices(refs = {}, { providers = DEFAULT_PROVIDERS, deadlineMs = 0 } = {}) {
   const guard = (ref, max) => (d) => !ref || Math.abs(d.v / ref - 1) <= max;
   const jobs = [
-    ...ASSETS.map((a) => (a.kind === 'metal' ? [a.symbol, providers.metal(a.symbol), JUMP.metal] : [a.symbol, providers.crypto(a.symbol), JUMP.crypto])),
+    ...ASSETS.map((a) => {
+      if (a.kind === 'metal') return [a.symbol, providers.metal(a.symbol), JUMP.metal];
+      if (a.kind === 'fx') return [a.symbol, providers.currency(a.symbol), JUMP.fx];
+      return [a.symbol, providers.crypto(a.symbol), JUMP.crypto];
+    }),
     ['USDTRY', providers.fx(), JUMP.fx],
   ];
   const done = {};

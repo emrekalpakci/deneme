@@ -25,6 +25,8 @@ export const GLOSSARY = Object.freeze([
   { term: 'Acil durum fonu', text: 'Beklenmedik giderler için kenarda tutulan, kolay çekilebilen para (genellikle 3–6 aylık zorunlu gider). Yatırıma ayrılmaz.' },
   { term: 'Enflasyon', text: 'Fiyatların genel olarak artması; paranın alım gücünün azalması. TL getirisi enflasyonun altındaysa aslında kayıptasın.' },
   { term: 'Dolar/TL (kur)', text: '1 ABD dolarının kaç TL ettiği. Altın, gümüş ve kripto dolarla fiyatlandığı için kur artınca TL fiyatları da artar.' },
+  { term: 'Euro/TL', text: '1 euronun kaç TL ettiği. Bu uygulamada Euro/Dolar paritesi × Dolar/TL ile hesaplanır. Banka ve döviz bürosu alış-satış farkı eklediği için onların fiyatı biraz farklıdır.' },
+  { term: 'Parite (Euro/Dolar)', text: '1 euronun kaç dolar ettiği (ör. 1,08). Parite yükselirse euro dolara karşı değer kazanmış demektir. Euro\'nun analizi bu fiyat üzerinden yapılır.' },
   { term: 'Kripto para', text: 'Bitcoin ve Ethereum gibi dijital varlıklar. Çok oynaktır; kısa sürede %50\'den fazla düşebilir. Devlet güvencesi yoktur.' },
   { term: 'Al ve tut', text: 'Bir kez alıp uzun süre satmadan beklemek. Strateji testinde sinyallere göre al-satla karşılaştırılır.' },
   { term: 'Geçmiş veri testi (backtest)', text: 'Bir kuralın geçmişte nasıl sonuç vereceğinin, sadece o güne kadarki veriyle hesaplanarak denenmesi. Geçmiş başarı geleceği garanti etmez.' },

@@ -342,7 +342,7 @@ function renderForm(ctx, portfolio) {
     rerender();
   };
 
-  const unitHint = a.kind === 'metal' ? 'gram olarak (ör. 2,5)' : `${a.unitLabel} olarak (ör. 0,0015)`;
+  const unitHint = a.kind === 'metal' ? 'gram olarak (ör. 2,5)' : `${a.unitLabel} olarak (ör. ${a.qtyExample || '0,0015'})`;
   const form = h(
     'section',
     { class: 'card form', 'aria-label': 'İşlem ekle' },

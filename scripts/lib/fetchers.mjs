@@ -66,6 +66,26 @@ export function cryptoProviders(symbol) {
   ];
 }
 
+/** Döviz/USD paritesi (ör. EUR → 1 € kaç $). */
+export function fxProviders(symbol) {
+  return [
+    {
+      id: 'swissquote',
+      run: () => liveFrom(S.SRC.SWISSQUOTE, `https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/${symbol}/USD`, S.parseSwissquote),
+    },
+    { id: 'coingecko', run: () => liveFrom(S.SRC.COINGECKO, 'https://api.coingecko.com/api/v3/exchange_rates', (j, t) => S.parseCoinGeckoRates(j, t)[symbol] || unavailable(S.SRC.COINGECKO, 'sembol yok')) },
+    {
+      id: 'currencyapi',
+      run: () =>
+        liveFrom(
+          S.SRC.CURRENCYAPI,
+          'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json',
+          (j) => S.parseCurrencyApi(j)[symbol] || unavailable(S.SRC.CURRENCYAPI, 'sembol yok'),
+        ),
+    },
+  ];
+}
+
 export function usdTryProviders() {
   return [
     {
