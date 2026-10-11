@@ -1,0 +1,56 @@
+# Geliştirme verisi: çalışma dalında veri betiğini gerçek kaynaklarla dener (yayın yapmaz).
+# Üretilen dosyalar "dev-data" dalına kaydedilir; ekran görüntüleri ve kontrol için kullanılır.
+name: Geliştirme verisi
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths:
+      - 'scripts/**'
+      - 'site/js/core/**'
+      - '.github/workflows/dev-data.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dev-data
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Önceki geliştirme geçmişini al
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REMOTE="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          mkdir -p out
+          if git ls-remote --exit-code --heads "$REMOTE" dev-data >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch dev-data "$REMOTE" prev
+            cp -r prev/veri out/veri 2>/dev/null || true
+          fi
+      - name: Veri betiğini çalıştır
+        env:
+          VERI_DIR: out/veri
+          SITE_DIR: out/site
+          BUILD_ID: ${{ github.sha }}
+        run: node scripts/update-data.mjs
+      - name: Sonuçları "dev-data" dalına kaydet
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd out
+          git init -q -b dev-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Geliştirme verisi $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" dev-data

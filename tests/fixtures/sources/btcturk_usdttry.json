@@ -1,0 +1,25 @@
+{
+ "data": [
+  {
+   "pair": "USDTTRY",
+   "pairNormalized": "USDT_TRY",
+   "timestamp": 1791705251956,
+   "last": 49.206,
+   "high": 49.31,
+   "low": 49.2,
+   "bid": 49.206,
+   "ask": 49.207,
+   "open": 49.226,
+   "volume": 5850239.15,
+   "average": 49.256,
+   "daily": -0.019,
+   "dailyPercent": -0.04,
+   "denominatorSymbol": "TRY",
+   "numeratorSymbol": "USDT",
+   "order": 1382
+  }
+ ],
+ "success": true,
+ "message": null,
+ "code": 0
+}

@@ -1,0 +1,46 @@
+{
+ "rates": {
+  "btc": {
+   "name": "Bitcoin",
+   "unit": "BTC",
+   "value": 1.0,
+   "type": "crypto"
+  },
+  "eth": {
+   "name": "Ether",
+   "unit": "ETH",
+   "value": 33.196,
+   "type": "crypto"
+  },
+  "usd": {
+   "name": "US Dollar",
+   "unit": "$",
+   "value": 82818.899,
+   "type": "fiat"
+  },
+  "eur": {
+   "name": "Euro",
+   "unit": "€",
+   "value": 73925.64,
+   "type": "fiat"
+  },
+  "try": {
+   "name": "Turkish Lira",
+   "unit": "₺",
+   "value": 4076454.242,
+   "type": "fiat"
+  },
+  "xau": {
+   "name": "Gold - Troy Ounce",
+   "unit": "XAU",
+   "value": 19.746,
+   "type": "commodity"
+  },
+  "xag": {
+   "name": "Silver - Troy Ounce",
+   "unit": "XAG",
+   "value": 1361.705,
+   "type": "commodity"
+  }
+ }
+}

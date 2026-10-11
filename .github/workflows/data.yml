@@ -1,0 +1,91 @@
+# Veri görevi: 30 dakikada bir fiyatları çeker, siteyi GitHub Pages'te yayınlar.
+# Geçmiş fiyatlar "veri" dalında günde bir kez kaydedilir. Kişisel veri kullanılmaz.
+name: Veri ve yayın
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: veri-ve-yayin
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Geçmiş verileri al ("veri" dalı)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REMOTE="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code --heads "$REMOTE" veri >/dev/null 2>&1; then
+            git clone -q --depth 1 --branch veri "$REMOTE" veri
+          else
+            mkdir -p veri && cd veri && git init -q -b veri
+          fi
+
+      - name: Fiyatları çek ve veri dosyalarını üret
+        env:
+          VERI_DIR: veri
+          SITE_DIR: site
+          BUILD_ID: ${{ github.sha }}
+        run: node scripts/update-data.mjs
+
+      - name: Geçmişi kaydet (günde bir kez değişir)
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd veri
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Geçmişte değişiklik yok."
+          else
+            git commit -qm "Geçmiş fiyatlar $(date -u +%Y-%m-%d)"
+            git push -q "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:veri
+            echo "Geçmiş kaydedildi."
+          fi
+
+      - name: Uygulama sürümünü işaretle
+        run: sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/g" site/sw.js site/index.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: GitHub Pages'te yayınla
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Ayda bir zamanlanmış görevi canlı tut
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$(date -u +%d)" = "01" ] && [ "$(date -u +%H)" = "00" ]; then
+            curl -sS -X PUT -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/data.yml/enable" -o /dev/null -w "Canlı tutma: HTTP %{http_code}\n"
+          fi
