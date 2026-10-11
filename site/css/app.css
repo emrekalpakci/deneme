@@ -770,3 +770,14 @@ dialog textarea {
     font-size: 2.3rem;
   }
 }
+
+/* Numaralı adımlar ve sade liste (Telefona kur) */
+.steps,
+.plain {
+  margin: 8px 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.45;
+}

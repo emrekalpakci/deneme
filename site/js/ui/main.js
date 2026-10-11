@@ -15,6 +15,7 @@ import { renderNews } from './views/news.js';
 import { renderGlossary } from './views/glossary.js';
 import { openClaudeDialog } from './claude.js';
 import { syncNow, onSyncChange, tokenDaysLeft } from './sync.js';
+import { renderInstall, watchInstallPrompt } from './views/install.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -53,8 +54,9 @@ const ROUTES = {
   sozluk: () => renderGlossary(),
   hakkinda: () => renderAbout(),
   test: () => renderTest(viewState()),
+  kur: () => renderInstall({ rerender: () => render({ force: true }) }),
 };
-const TAB_OF = { durum: 'daha', ayarlar: 'daha', sozluk: 'daha', hakkinda: 'daha', test: 'daha' };
+const TAB_OF = { durum: 'daha', ayarlar: 'daha', sozluk: 'daha', hakkinda: 'daha', test: 'daha', kur: 'daha' };
 
 function currentRoute() {
   const r = location.hash.replace(/^#\/?/, '').split('?')[0];
@@ -147,6 +149,7 @@ window.addEventListener('online', () => {
 });
 // Eşitleme başka cihazdan yeni veri getirdiyse ekranı yenile (form doldururken bozmadan).
 onSyncChange((changed) => (changed ? render() : renderBanner()));
+watchInstallPrompt(() => currentRoute() === 'kur' && render({ force: true }));
 window.addEventListener('offline', () => {
   state.fromCache = !!state.market;
   state.error = 'İnternet bağlantısı yok';
@@ -162,7 +165,8 @@ setInterval(() => {
   if (document.visibilityState === 'visible' && navigator.onLine !== false) refreshLive();
 }, 60_000);
 
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
+// https'te (ve yerel denemede) servis çalışanı açılır.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 

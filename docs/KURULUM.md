@@ -1,7 +1,39 @@
-# Kurulum kılavuzu
+# Kurulum ve bakım kılavuzu
 
 Bu kılavuz kod bilgisi gerektirmez. Her şey tarayıcıdan ve telefondan yapılır.
 Hepsi **ücretsizdir**; kredi kartı istenmez.
+
+**Uygulama adresi:** <https://emrekalpakci.github.io/deneme/>
+
+İçindekiler:
+- [0. Uygulamayı telefona kur](#0-uygulamayı-telefona-kur)
+- [A. Gizli depo](#a-gizli-depo-portföyün-burada-durur) · [B. Telegram botu](#b-telegram-botu) · [C. Telefon token'ı](#c-telefon-için-github-tokenı-portföy-eşitleme) · [D. Bildirimleri dene](#d-bildirimleri-dene)
+- [Bildirimler nasıl çalışır?](#bildirimler-nasıl-çalışır) · [Ücretsiz sınır](#ücretsiz-sınır)
+- [Görev durursa ne yapılır?](#görev-durursa-ne-yapılır) · [Veriler güncellenmiyorsa](#veriler-güncellenmiyorsa)
+- [Token'ı yenileme](#tokenı-yenileme-yılda-bir) · [Yeni varlık ekleme](#yeni-varlık-ekleme) · [Ücret çıkabilecek noktalar](#ücret-çıkabilecek-noktalar)
+
+---
+
+## 0. Uygulamayı telefona kur
+
+Uygulama mağazadan indirilmez; web sitesi olarak açılır ve ana ekrana eklenir.
+Uygulamada **Daha fazla → Telefona kur** sayfası da aynı adımları gösterir.
+
+**Android (Chrome):**
+1. <https://emrekalpakci.github.io/deneme/> adresini Chrome'da aç.
+2. Sağ üstteki üç noktaya (⋮) dokun → **Uygulamayı yükle** (ya da **Ana ekrana ekle**) → **Yükle**.
+3. Simge ana ekrana gelir. Ayarların ve portföyün aynen kalır.
+
+**iPhone (Safari):**
+1. Adresi **Safari**'de aç.
+2. Alttaki **Paylaş** düğmesine (yukarı ok çıkan kare) dokun.
+3. Listeyi kaydır → **Ana Ekrana Ekle** → sağ üstte **Ekle**.
+4. ⚠️ iPhone'da ana ekrandaki uygulama Safari'den **ayrı hafıza** kullanır. Uygulamayı ana
+   ekrandan aç, **Ayarlar → Portföy eşitleme**'ye token'ı bir kez daha yapıştır.
+   Portföyün gizli depodan kendiliğinden gelir.
+
+Güncellemeler kendiliğinden gelir; yeniden kurman gerekmez. İnternet yokken uygulama son
+kaydedilen fiyatları ve portföyünü gösterir.
 
 ---
 
@@ -131,3 +163,61 @@ Uygulama, token'ın bitmesine 14 gün kala uyarır.
 2. Uygulamada **Ayarlar → Portföy eşitleme → Eşitlemeyi kapat**, sonra yeni token'la
    **Kaydet ve bağlan**. Portföyün kaybolmaz.
 3. GitHub'da eski token'ı sil.
+
+---
+
+## Veriler güncellenmiyorsa
+
+Uygulama üstte "Veriler … saatinden beri güncellenmedi" yazıyorsa:
+1. **Daha fazla → Durum** ekranında "Son otomatik güncelleme" saatine bak.
+2. <https://github.com/emrekalpakci/deneme/actions/workflows/data.yml> sayfasını aç.
+   - Üstte **"This scheduled workflow is disabled"** yazıyorsa **Enable workflow**'a bas.
+   - Yazmıyorsa sağdaki **Run workflow** → yeşil **Run workflow** ile elle çalıştır.
+3. Kırmızı çarpılı bir çalıştırma varsa tıkla; hata Türkçe yazar
+   (ör. "market.json eski", "Ons altın: alınamadı").
+
+Bilmen gerekenler:
+- GitHub zamanlanmış görevleri yoğunlukta geciktirebilir ya da atlayabilir. Ara sıra
+  20–30 dakikalık gecikme normaldir.
+- Açık depoda 60 gün hiç hareket olmazsa GitHub zamanlanmış görevi durdurur. Veri görevi
+  her gün geçmiş fiyatları kaydettiği ve ayda bir kendini yeniden etkinleştirdiği için bu
+  normalde olmaz.
+- Bir veri kaynağı bozulursa yedeği devreye girer. Hepsi bozulursa uygulama "alınamadı"
+  yazar; fiyat uydurmaz.
+
+---
+
+## Yeni varlık ekleme
+
+Örnek: platin ya da Solana eklemek. Kod bilmeden en kolay yol, bu depoda Claude'a
+(claude.ai/code) şunu yazmaktır:
+
+> "Platin'i (XPT) yeni varlık olarak ekle. CLAUDE.md kurallarına uy, testleri çalıştır."
+
+Yapılacak iş `site/js/core/assets.js` dosyasına tek bir kayıt eklemektir:
+- Metal için `kind: 'metal'`, sembol (ör. `XPT`), birim gram.
+- Kripto için `kind: 'crypto'`, sembol (ör. `SOL`), birim adet.
+- Kaynak testi (Actions → **Kaynak testi**) yeni sembolün ücretsiz kaynaklarda bulunduğunu doğrular.
+- Bütçe planlayıcının dağılım tablosu yeni varlığı kendiliğinden içermez (payı 0 kalır).
+
+---
+
+## Ücret çıkabilecek noktalar
+
+Bugünkü haliyle **hiçbir ücret yoktur**. Dikkat edilecekler:
+
+1. **Kredi kartı ekleme.** GitHub'a kart eklemezsen hiçbir sınır aşımı faturalanmaz; sadece
+   o ay ilgili görev durur. Eklersen Billing'de bütçeyi 0 $ yap.
+2. **Gizli depodaki Actions süresi** (ayda 2.000 dk, kullanım ~1.460 dk). Yukarıdaki
+   "Ücretsiz sınır" bölümüne bak.
+3. **`deneme` deposunu gizliye çevirme.** Ücretsiz planda GitHub Pages sadece açık depolarda
+   çalışır; gizlersen site kapanır.
+4. **Aynı adres uyarısı:** Bu GitHub hesabında başka depolar için de GitHub Pages sitesi
+   açarsan hepsi `emrekalpakci.github.io` adresini paylaşır ve telefondaki token'ı
+   okuyabilir. Başka bir Pages sitesi açmak istersen ayrı bir GitHub hesabı kullan.
+5. **Veri kaynakları** ileride ücretli olabilir ya da kapanabilir (ör. CoinGecko anahtar
+   isteyebilir). Her verinin yedek kaynağı var; hepsi kapanırsa uygulama "alınamadı" der.
+6. **Özel alan adı** (ör. `yatirimim.com`) yıllık ücretlidir; gerek yok.
+
+**Yasal not:** Uygulama kişisel kullanım içindir. Başkalarına yatırım tavsiyesi vermek
+SPK lisansı gerektirir. Site arama motorlarına kapalıdır.

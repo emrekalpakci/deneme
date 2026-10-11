@@ -37,6 +37,7 @@ const SHELL = [
   'js/ui/portfolio-store.js',
   'js/ui/sync.js',
   'js/ui/views/sync-settings.js',
+  'js/ui/views/install.js',
   'js/core/sync.js',
   'js/core/portfolio.js',
   'js/core/assets.js',
@@ -84,9 +85,16 @@ async function networkFirst(req) {
     return res;
   } catch {
     const hit = (await cache.match(stripQuery(req))) || (req.mode === 'navigate' ? await cache.match('index.html') : null);
-    if (hit) return hit;
+    if (hit) return markCached(hit);
     return new Response('Çevrimdışı ve kayıtlı kopya yok.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
+}
+
+// Kayıtlı kopyadan dönen yanıt işaretlenir; uygulama "internetten yeni alındı" demesin diye.
+function markCached(res) {
+  const headers = new Headers(res.headers);
+  headers.set('X-Yr-Kayitli', '1');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
 }
 
 // Veri dosyaları "?t=..." ile istenir; önbellekte tek kopya tutulur.

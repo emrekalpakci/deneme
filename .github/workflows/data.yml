@@ -80,6 +80,12 @@ jobs:
         id: deploy
         uses: actions/deploy-pages@v4
 
+      - name: Canlı siteyi kontrol et
+        env:
+          SITE_URL: ${{ steps.deploy.outputs.page_url }}
+          BUILD_ID: ${{ github.sha }}
+        run: node scripts/check-site.mjs
+
       - name: Ayda bir zamanlanmış görevi canlı tut
         if: github.event_name == 'schedule'
         env:

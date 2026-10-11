@@ -13,6 +13,8 @@ export async function loadMarket() {
     const data = await res.json();
     if (data?.schemaVersion !== SCHEMA) throw new Error('veri sürümü uyumsuz');
     save('market', data);
+    // Servis çalışanı internet yokken kayıtlı kopyayı verir: bunu açıkça göster.
+    if (res.headers.get('X-Yr-Kayitli')) return { data, fromCache: true, error: 'İnternet bağlantısı yok' };
     return { data, fromCache: false, error: null };
   } catch (err) {
     const cached = load('market');

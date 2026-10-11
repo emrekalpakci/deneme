@@ -13,6 +13,7 @@ export function renderMore() {
     h(
       'nav',
       { class: 'card menu' },
+      link('#/kur', 'Telefona kur', 'ana ekrana ekle ›'),
       link('#/test', 'Strateji testi', 'geçmiş başarı ›'),
       link('#/durum', 'Durum', 'veri ve kaynaklar ›'),
       link('#/ayarlar', 'Ayarlar', 'tema, eşitleme, Telegram ›'),
@@ -83,6 +84,7 @@ export function renderAbout() {
         src('CoinDesk, Cointelegraph, FXStreet', 'haber başlıkları (RSS)'),
       ),
       h('p', { class: 'meta' }, 'Para hesapları big.js (MIT lisansı) ile yapılır.'),
+      h('p', { class: 'meta' }, h('a', { href: 'https://github.com/emrekalpakci/deneme/blob/main/docs/KURULUM.md', target: '_blank', rel: 'noopener' }, 'Kurulum ve bakım kılavuzu')),
     ),
   );
 }
