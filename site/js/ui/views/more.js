@@ -15,7 +15,7 @@ export function renderMore() {
       link('#/test', 'Strateji testi', 'geçmiş başarı ›'),
       link('#/durum', 'Durum', 'veri ve kaynaklar ›'),
       link('#/ayarlar', 'Ayarlar', 'tema ›'),
-      link('#/sozluk', 'Sözlük', '5. adımda'),
+      link('#/sozluk', 'Sözlük', 'terimler ›'),
       link('#/hakkinda', 'Hakkında', 'kaynaklar, uyarılar ›'),
     ),
   );
@@ -81,17 +81,10 @@ export function renderAbout() {
         src('Coinbase, Bitstamp, Binance', 'kripto fiyatları'),
         src('CoinGecko', 'yedek kur'),
         src('TCMB', 'resmi günlük kur'),
+        src('Habertürk, AA, NTV, Sözcü, Dünya, Bloomberg HT', 'haber başlıkları (RSS)'),
+        src('CoinDesk, Cointelegraph, FXStreet', 'haber başlıkları (RSS)'),
       ),
       h('p', { class: 'meta' }, 'Para hesapları big.js (MIT lisansı) ile yapılır.'),
     ),
-  );
-}
-
-export function renderComingSoon(title, step, text) {
-  return h(
-    'div',
-    {},
-    h('h2', { class: 'section-title' }, title),
-    h('div', { class: 'card placeholder' }, h('p', {}, `${title} ${step}. adımda eklenecek.`), text ? h('p', { class: 'meta' }, text) : null),
   );
 }

@@ -72,3 +72,17 @@ export async function fetchLivePrices(market, { force = false } = {}) {
   lastLive = { at: lastLive.at, prices };
   return prices;
 }
+
+let newsPromise = null;
+/** Haber dosyası (son 72 saat). Hata olursa bir sonraki çağrıda yeniden denenir. */
+export function loadNews({ force = false } = {}) {
+  if (!newsPromise || force) {
+    newsPromise = fetch(`data/news.json?t=${Date.now()}`, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status === 404 ? 'haber dosyası henüz yok' : `sunucu hatası (${r.status})`))))
+      .catch((err) => {
+        newsPromise = null;
+        throw err;
+      });
+  }
+  return newsPromise;
+}

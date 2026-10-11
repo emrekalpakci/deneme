@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Test verisi: gerçek akışların yapısını taklit eden uydurma başlıklar (uygulamada gösterilmez). -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+<title>Örnek Ekonomi</title>
+<item>
+  <title><![CDATA[Gram altın rekor kırdı: ons 4.200 doları aştı]]></title>
+  <link>https://ornek.com.tr/ekonomi/altin-rekor</link>
+  <pubDate>Sun, 11 Oct 2026 10:25:00 +0300</pubDate>
+</item>
+<item>
+  <title>Bitcoin&#39;de satış baskısı &amp; sert düşüş</title>
+  <link><![CDATA[https://ornek.com.tr/kripto/btc?a=1&b=2]]></link>
+  <pubDate>Sat, 10 Oct 2026 22:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>&lt;b&gt;Gümüş fiyatları&lt;/b&gt; yükseldi<script>alert(1)</script></title>
+  <link>javascript:alert(1)</link>
+  <guid>https://ornek.com.tr/gumus-yukseldi</guid>
+  <dc:date>2026-10-11T06:00:00Z</dc:date>
+</item>
+<item>
+  <title>İSTANBUL'DA KIŞ HAZIRLIĞI</title>
+  <link>http://ornek.com.tr/guvensiz</link>
+  <pubDate>Sun, 11 Oct 2026 09:00:00 +0300</pubDate>
+</item>
+<item>
+  <title>Tarihsiz haber</title>
+  <link>https://ornek.com.tr/tarihsiz</link>
+</item>
+</channel>
+</rss>

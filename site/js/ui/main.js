@@ -2,15 +2,18 @@
 
 import { h, clear } from './dom.js';
 import { load, save } from './store.js';
-import { loadMarket, fetchLivePrices, loadHistory } from './data.js';
+import { loadMarket, fetchLivePrices, loadHistory, loadNews } from './data.js';
 import { applyLivePrices } from '../core/market.js';
 import { formatWhen, ageHours } from './format.js';
 import { renderMarket } from './views/market.js';
 import { renderStatus } from './views/status.js';
-import { renderMore, renderSettings, renderAbout, renderComingSoon } from './views/more.js';
+import { renderMore, renderSettings, renderAbout } from './views/more.js';
 import { renderPortfolio, isPortfolioEditing } from './views/portfolio.js';
 import { renderBudget } from './views/budget.js';
 import { renderTest } from './views/test.js';
+import { renderNews } from './views/news.js';
+import { renderGlossary } from './views/glossary.js';
+import { openClaudeDialog } from './claude.js';
 
 const BUILD_ID = document.documentElement.dataset.build || '';
 
@@ -42,11 +45,11 @@ const ROUTES = {
   piyasa: () => renderMarket(viewState()),
   portfoy: () => renderPortfolio({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
   butce: () => renderBudget({ ...viewState(), rerender: () => render({ force: true }), loadHistory }),
-  haberler: () => renderComingSoon('Haberler', 5, 'RSS haber başlıkları ve olumlu/olumsuz puanı.'),
+  haberler: () => renderNews({ ...viewState(), rerender: () => render({ force: true }), loadNews }),
   daha: () => renderMore(),
   durum: () => renderStatus(viewState()),
   ayarlar: () => renderSettings({ theme: state.theme, setTheme }),
-  sozluk: () => renderComingSoon('Sözlük', 5),
+  sozluk: () => renderGlossary(),
   hakkinda: () => renderAbout(),
   test: () => renderTest(viewState()),
 };
@@ -124,7 +127,11 @@ async function refreshLive(force = false) {
   render();
 }
 
-document.getElementById('refresh').addEventListener('click', () => refresh({ forceLive: true }));
+document.getElementById('refresh').addEventListener('click', () => {
+  loadNews({ force: true }).catch(() => {});
+  refresh({ forceLive: true });
+});
+document.getElementById('ask-claude').addEventListener('click', () => openClaudeDialog({ market: viewState().market, loadNews }));
 window.addEventListener('hashchange', () => {
   render({ force: true });
   document.getElementById('view').focus({ preventScroll: true });

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Test verisi: Atom yapısı, uydurma başlıklar. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Örnek</title>
+  <entry>
+    <title type="text">Ethereum rallies as ETH ETF inflows surge</title>
+    <link rel="alternate" href="https://ornek.com/eth-rally" />
+    <published>2026-10-11T05:00:00Z</published>
+  </entry>
+  <entry>
+    <title type="text">Crypto market slides after exchange hack</title>
+    <link href="https://ornek.com/crypto-slides"/>
+    <updated>2026-10-10T20:00:00Z</updated>
+  </entry>
+</feed>

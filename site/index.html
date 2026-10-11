@@ -23,7 +23,10 @@
   <body>
     <header class="topbar">
       <h1 class="brand">Yatırım Rehberi</h1>
-      <button id="refresh" class="btn" type="button" aria-label="Fiyatları yenile">↻ Yenile</button>
+      <div class="row top-actions">
+        <button id="ask-claude" class="btn btn-primary" type="button">Claude'a sor</button>
+        <button id="refresh" class="btn" type="button" aria-label="Fiyatları yenile">↻</button>
+      </div>
     </header>
     <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
     <main id="view" tabindex="-1"></main>

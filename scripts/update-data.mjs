@@ -11,6 +11,8 @@ import { join } from 'node:path';
 import { ASSETS } from '../site/js/core/assets.js';
 import { buildMarket, tradingDate } from '../site/js/core/market.js';
 import { analyzeMarket } from '../site/js/core/analysis.js';
+import { buildNews } from '../site/js/core/news.js';
+import { fetchAllFeeds } from './lib/news-feeds.mjs';
 import { isUsable } from '../site/js/core/datum.js';
 import { merge } from '../site/js/core/series.js';
 import { firstUsable, metalProviders, cryptoProviders, usdTryProviders } from './lib/fetchers.mjs';
@@ -75,8 +77,14 @@ if (nyHour === 17 && !['Sat', 'Sun'].includes(nyWeekday)) {
 
 // 4) Çıktılar
 const series = Object.fromEntries(Object.keys(SERIES).map((id) => [id, combined(histories[id])]));
+const feeds = await fetchAllFeeds();
+const news = buildNews(feeds, now);
+log(`Haberler: ${news.items.length} başlık; akışlar: ${news.feeds.map((f) => `${f.id}:${f.ok ? f.count : f.why}`).join(', ')}`);
+log(`Haber puanları: ${JSON.stringify(news.perAsset)}`);
+
 const market = buildMarket({ now, live, history: series, sources, buildId: BUILD_ID });
-analyzeMarket(market, series);
+analyzeMarket(market, series, { news: news.perAsset });
+market.newsSummary = { generatedAt: news.generatedAt, perAsset: news.perAsset, feedsOk: news.feeds.filter((f) => f.ok).length, feedsTotal: news.feeds.length };
 for (const a of ASSETS) {
   const an = market.assets[a.id].analysis;
   const bt = market.assets[a.id].backtest;
@@ -84,6 +92,7 @@ for (const a of ASSETS) {
 }
 await mkdir(join(SITE_DIR, 'data'), { recursive: true });
 await writeFile(join(SITE_DIR, 'data', 'market.json'), `${JSON.stringify(market)}\n`);
+await writeFile(join(SITE_DIR, 'data', 'news.json'), `${JSON.stringify(news)}\n`);
 const historyOut = {
   schemaVersion: 1,
   generatedAt: new Date(now).toISOString(),

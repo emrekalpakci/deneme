@@ -614,6 +614,75 @@ main {
   border-left-color: var(--accent);
 }
 
+.top-actions {
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.top-actions .btn {
+  min-height: 38px;
+  padding: 6px 12px;
+}
+
+.filter {
+  margin: 4px 0 12px;
+}
+
+.filter button {
+  flex: 1 1 15%;
+  min-height: 36px;
+  font-size: 0.85rem;
+}
+
+.news-list {
+  list-style: none;
+  padding: 4px 16px;
+}
+
+.news-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.news-item:last-child {
+  border-bottom: 0;
+}
+
+.news-item a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1.35;
+}
+
+.news-item a:hover {
+  text-decoration: underline;
+}
+
+.news-item .meta {
+  margin-top: 4px;
+}
+
+.pill.neg {
+  background: var(--loss-bg);
+  color: var(--loss);
+}
+
+.glossary dt {
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.glossary dt:first-child {
+  margin-top: 0;
+}
+
+.glossary dd {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 /* --- Alt sekme çubuğu --- */
 .tabbar {
   position: fixed;
