@@ -41,3 +41,9 @@ Puanlama sabitleri değişirse `SCORING_VERSION` artırılır ve buraya not dü�
 - Geçmiş testte al-sat maliyeti %1 (banka/döviz bürosu makası). Varsayılan hedefler: kâr +%10, zarar −%5 (döviz daha az oynak).
 - Bütçe planlayıcının dağılım tablosuna eklenmedi (payı 0); dağılım tablosu ayrıca karar gerektirir.
 - Haberlerde "euro/avro" ancak kur/para bağlamında sayılır (ör. "Euro 2028" spor haberi sayılmaz).
+
+## Dolar yatırım aracı olarak eklendi — 11 Ekim 2026
+- Dolar'ın fiyatı Dolar/TL kurudur; dolar fiyatı tanım gereği 1'dir.
+- Analiz ve geçmiş test Dolar/TL kuru (TL) üzerinden yapılır; "Dolar/TL trendi" göstergesi Dolar için kullanılmaz (çift sayım olmasın).
+- Uyarı: Dolar/TL uzun yıllardır neredeyse kesintisiz yükseldiği için RSI çoğu zaman çok yüksektir; "Pahalı görünüyor" etiketi sık çıkar ve geçmiş testte rastgele günlerden daha kötü sonuç verdi. Bu, ekranda geçmiş test sonucu olarak açıkça gösterilir; kurallar Dolar'a özel olarak değiştirilmedi (SCORING_VERSION 1).
+- Haberlerde "dolar" başka bir varlığın fiyat birimiyse (ör. "ons 4.200 dolar") Dolar'a sayılmaz.
