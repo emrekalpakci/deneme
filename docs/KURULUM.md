@@ -34,12 +34,14 @@ Bildirim görevlerini (dosyaları) bu depoya Claude ekler.
 
 ### Bot anahtarını gizli depoya kaydet ("Secret")
 
-1. Gizli deponu aç: `https://github.com/KULLANICI-ADIN/yatirim-verilerim`
-2. Üstte **Settings** (Ayarlar) → solda **Secrets and variables** → **Actions**.
-3. Yeşil **New repository secret** düğmesine bas.
-4. **Name**: `TELEGRAM_BOT_TOKEN` (aynen böyle, büyük harflerle)
-5. **Secret**: BotFather'ın verdiği anahtarı yapıştır.
-6. **Add secret** düğmesine bas.
+1. Şu bağlantıyı aç (doğrudan forma gider):
+   `https://github.com/KULLANICI-ADIN/yatirim-verilerim/settings/secrets/actions/new`
+   (Elle: gizli depo → **Settings** → solda **Secrets and variables** → **Actions** →
+   yeşil **New repository secret**.)
+2. Sayfada iki kutu ve bir düğme vardır.
+3. Üstteki **Name** kutusuna: `TELEGRAM_BOT_TOKEN` (aynen böyle, büyük harflerle)
+4. Alttaki büyük **Secret** kutusuna: BotFather'ın verdiği anahtarı yapıştır.
+5. Yeşil **Add secret** düğmesine bas.
 
 Anahtar artık GitHub'da şifreli durur. Kimse (sen dahil) onu tekrar göremez, sadece
 bildirim görevi kullanabilir. Değiştirmek istersen aynı yerden yeni değer girersin.
