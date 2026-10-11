@@ -120,3 +120,9 @@ test('Dolar haberleri: dolar başka varlığın birimiyse sayılmaz', () => {
   assert.deepEqual(tagAssets('Altın ons başına 4.200 dolara çıktı'), ['gram-altin']);
   assert.deepEqual(tagAssets('Euro dolar karşısında geriledi'), ['euro']);
 });
+
+test('risk notu varlığa göre: Dolar ve Euro ayrı', () => {
+  assert.match(riskNote('fx', 'USD'), /Dolar/);
+  assert.doesNotMatch(riskNote('fx', 'USD'), /Euro/);
+  assert.match(riskNote('fx', 'EUR'), /Euro/);
+});

@@ -179,7 +179,8 @@ const CLOSING = {
   none: 'Yeterli ve güncel veri olmadığı için değerlendirme yapılmadı.',
 };
 
-export function riskNote(kind) {
+export function riskNote(kind, symbol = null) {
+  if (symbol === 'USD') return 'Dolar da her zaman yükselmez; TL\'nin güçlendiği dönemlerde kur düşebilir ve faiz getirisini kaçırabilirsin.';
   if (kind === 'crypto') return 'Kripto paralar kısa sürede çok sert düşebilir; kaybetmeyi göze alamayacağın parayla alma.';
   if (kind === 'fx') return 'Euro\'nun TL değeri hem euro/dolar paritesine hem dolar kuruna bağlıdır; döviz de değer kaybedebilir.';
   return 'Altın ve gümüş de kısa vadede düşebilir; kısa vadeli kazanç garantisi yoktur.';

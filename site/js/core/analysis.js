@@ -68,7 +68,7 @@ export function analyzeAsset({ asset, points, fxPoints = [], stale = false, news
     availShare: result.availShare,
     confidence: conf,
     reasons: reasonSentences(result, factors),
-    riskNote: riskNote(asset.kind),
+    riskNote: riskNote(asset.kind, asset.symbol),
     factors: result.rows.map((r) => ({ ...r, raw: factors[r.id]?.raw || null })),
     indicators: {
       price: values[i],
