@@ -1,6 +1,6 @@
 // Piyasa özeti (market.json) üreten saf fonksiyonlar. Ağ isteği yapmaz; test edilebilir.
 
-import { ASSETS, GRAMS_PER_TROY_OUNCE } from './assets.js';
+import { ASSETS, GRAMS_PER_TROY_OUNCE, isDollar } from './assets.js';
 import { Big, decFromNumber, toRoundedNumber } from './money.js';
 import { ST, isUsable, withStaleness, unavailable, combine } from './datum.js';
 import { gramUsdFromOunce, gramTryFromOunce, usdToTry } from './convert.js';
@@ -43,6 +43,8 @@ export function prevClose(points, day) {
 
 /** Varlığın birim başına USD günlük serisi (metalde gram, kriptoda adet). */
 export function unitUsdSeries(asset, history) {
+  // Dolar'ın dolar fiyatı her gün 1'dir (TL serisi böylece Dolar/TL kuru olur).
+  if (isDollar(asset)) return (history.USDTRY || []).map(([d]) => [d, 1]);
   const pts = history[`${asset.symbol}USD`] || [];
   if (asset.kind !== 'metal') return pts;
   return pts.map(([d, v]) => [d, toRoundedNumber(decFromNumber(v).div(G), 6)]);
@@ -104,7 +106,9 @@ export function buildMarket({ now, live, history, sources = [], buildId = 'yerel
 
 function buildAsset(asset, { now, live, history, fxLive, fxHist }) {
   const kind = asset.kind;
-  const raw = applyFreshness(live[asset.symbol] || unavailable('-', 'fiyat alınamadı'), kind, now);
+  const raw = isDollar(asset)
+    ? { v: 1, asOf: isUsable(fxLive) ? fxLive.asOf : new Date(now).toISOString(), src: 'tanım (1 $ = 1 $)', st: 'ok' }
+    : applyFreshness(live[asset.symbol] || unavailable('-', 'fiyat alınamadı'), kind, now);
   const out = {
     id: asset.id,
     name: asset.name,
@@ -124,7 +128,7 @@ function buildAsset(asset, { now, live, history, fxLive, fxHist }) {
     tl = usdToTry(raw, fxLive);
   }
   if (isUsable(usd)) usd.src = raw.src;
-  if (isUsable(tl)) tl.src = `${raw.src} × ${fxLive.src}`;
+  if (isUsable(tl)) tl.src = isDollar(asset) ? fxLive.src : `${raw.src} × ${fxLive.src}`;
   out.usd = usd;
   out.try = tl;
 

@@ -98,6 +98,7 @@ const ASSET_RULES = {
   'gram-gumus': (w) => starts(w, 'gümüş', 'gumus') || ['silver', 'xag'].includes(w),
   btc: (w) => starts(w, 'bitcoin') || w === 'btc',
   eth: (w) => starts(w, 'ethereum') || ['eth', 'ether'].includes(w),
+  dolar: (w) => starts(w, 'dolar') || ['usd', 'usdtry'].includes(w),
   euro: (w) => EURO_WORDS.has(w),
 };
 // "Euro" spor (Euro 2028), Avrupa haberleri vb. için de geçer: sadece kur/para bağlamında sayılır.
@@ -127,6 +128,9 @@ export function tagAssets(title) {
   });
   if (!tags.includes('btc') && !tags.includes('eth') && ws.some(cryptoGeneral)) tags.push('btc', 'eth');
   if (!tags.includes('euro') && /avrupa merkez bankas|european central bank/.test(lowerTr(title))) tags.push('euro');
+  // "Dolar" çoğu haberde başka bir varlığın fiyat birimidir ("ons 4.200 dolar", "euro dolar karşısında"):
+  // başka bir varlık haberin konusuysa haber Dolar'a sayılmaz.
+  if (tags.includes('dolar') && tags.length > 1) tags.splice(tags.indexOf('dolar'), 1);
   return tags;
 }
 

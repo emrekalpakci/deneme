@@ -1,7 +1,7 @@
 // "Claude'a sor" metni: fiyatlar (saatleriyle), analiz, portföy ve haber başlıkları + sabit talimat.
 // Bu metin sadece panoya kopyalanır; hiçbir yapay zeka servisine gönderilmez. Token ya da gizli bilgi içermez.
 
-import { ASSETS, priceDecimals } from './assets.js';
+import { ASSETS, priceDecimals, isDollar } from './assets.js';
 import { isUsable } from './datum.js';
 import { formatTry, formatUsd, formatPercent, formatDecimal, formatQuantity, decFromNumber } from './money.js';
 
@@ -18,7 +18,10 @@ function priceLine(asset, a, fx) {
   if (isUsable(a.try)) parts.push(`${formatTry(String(a.try.v), priceDecimals(asset))}${asset.kind === 'metal' ? '/gram' : asset.kind === 'fx' ? `/${asset.unitLabel}` : ''}`);
   else parts.push(`TL fiyatı alınamadı (${a.try?.why || 'veri yok'})`);
   const usd = asset.kind === 'metal' ? a.ounceUsd : a.usd;
-  if (isUsable(usd)) parts.push(`${asset.kind === 'metal' ? 'ons ' : asset.kind === 'fx' ? `1 ${asset.unitLabel} = ` : ''}${formatUsd(String(usd.v), priceDecimals(asset))} (${usd.src}, ${when(usd.asOf)}${a.marketOpen === false ? ', piyasa kapalı' : ''})`);
+  if (isDollar(asset)) {
+    // Dolar'ın fiyatı Dolar/TL kurudur; kaynağı ve saati yazılır.
+    if (isUsable(a.try)) parts.push(`kur: ${a.try.src}, ${when(a.try.asOf)}${a.marketOpen === false ? ', piyasa kapalı' : ''}`);
+  } else if (isUsable(usd)) parts.push(`${asset.kind === 'metal' ? 'ons ' : asset.kind === 'fx' ? `1 ${asset.unitLabel} = ` : ''}${formatUsd(String(usd.v), priceDecimals(asset))} (${usd.src}, ${when(usd.asOf)}${a.marketOpen === false ? ', piyasa kapalı' : ''})`);
   else parts.push(`USD fiyatı alınamadı (${usd?.why || 'veri yok'})`);
   if (a.change?.tryPct !== null && a.change?.tryPct !== undefined) parts.push(`önceki kapanışa göre ${pctOf(a.change.tryPct)} (TL)`);
   return `- ${asset.name}: ${parts.join('; ')}`;

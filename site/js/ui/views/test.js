@@ -49,7 +49,7 @@ export function renderTest({ market }) {
         'ul',
         { class: 'rules meta' },
         h('li', {}, 'Test edilen göstergeler: trend, RSI, zirveden uzaklık, oynaklık. Haber ve Dolar/TL göstergeleri geçmişte test edilemedi.'),
-        h('li', {}, 'Başarı dolar fiyatıyla ölçüldü (TL\'nin değer kaybı karışmasın diye), al-sat maliyeti dahil.'),
+        h('li', {}, 'Başarı dolar fiyatıyla ölçüldü (TL\'nin değer kaybı karışmasın diye), al-sat maliyeti dahil. Dolar\'ın kendisi için TL fiyatıyla (kurla) ölçüldü.'),
         h('li', {}, 'Ardışık günler aynı fırsatı tekrar saymasın diye en az 90 gün arayla "bağımsız" örnekler ayrıca sayıldı; 10\'dan azsa hüküm verilmez.'),
         h('li', {}, 'Kurallar ve ağırlıklar bu sonuçlara göre ayarlanmadı; ayarlansaydı test kendini kandırmış olurdu.'),
         h('li', {}, 'Geçmiş, geleceği garanti etmez.'),

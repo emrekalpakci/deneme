@@ -90,3 +90,33 @@ test("Claude'a sor: Euro satırı parite ve 4 haneli kurla", () => {
   assert.match(line, /53,4678 TL\/€/);
   assert.match(line, /1 € = \$1,0852/);
 });
+
+test('Dolar: fiyatı Dolar/TL kuru, dolar fiyatı her zaman 1; analiz kur üzerinden', async () => {
+  const { analyzeMarket } = await import('../../site/js/core/analysis.js');
+  const d = getAsset('dolar');
+  assert.equal(d.kind, 'fx');
+  const m = buildMarket({ now: TUE, live: live(TUE), history });
+  assert.equal(m.assets.dolar.try.v, 49.27);
+  assert.equal(m.assets.dolar.usd.v, 1);
+  assert.equal(m.assets.dolar.prevClose.try, 49.2);
+  // Kur yoksa Dolar'ın TL fiyatı da yok (uydurulmaz)
+  assert.equal(buildMarket({ now: TUE, live: live(TUE, { USDTRY: unavailable('-', 'zaman aşımı') }), history }).assets.dolar.try.st, 'unavailable');
+  // 300 günlük yükselen kur serisiyle analiz: etiket üretilir, "Dolar/TL trendi" göstergesi kullanılmaz
+  const days = [];
+  for (let i = 0; i < 300; i++) days.push([new Date(Date.UTC(2025, 11, 1) + i * 86400000).toISOString().slice(0, 10), 40 + i * 0.03]);
+  const series = { USDTRY: days, EURUSD: days.map(([dd]) => [dd, 1.1]) };
+  const mm = buildMarket({ now: TUE, live: live(TUE), history: series });
+  analyzeMarket(mm, series);
+  const an = mm.assets.dolar.analysis;
+  assert.ok(['buy', 'wait', 'expensive', 'none'].includes(an.label));
+  assert.equal(an.factors.find((f) => f.id === 'fx').score, null);
+  assert.equal(an.indicators.price, 49.27, 'analiz fiyatı TL kurudur');
+  const line = buildClaudePrompt({ market: mm, now: TUE }).split('\n').find((l) => l.startsWith('- Dolar:'));
+  assert.match(line, /49,2700 TL\/\$; kur: Swissquote/);
+});
+
+test('Dolar haberleri: dolar başka varlığın birimiyse sayılmaz', () => {
+  assert.deepEqual(tagAssets('Dolar/TL rekor kırdı'), ['dolar']);
+  assert.deepEqual(tagAssets('Altın ons başına 4.200 dolara çıktı'), ['gram-altin']);
+  assert.deepEqual(tagAssets('Euro dolar karşısında geriledi'), ['euro']);
+});

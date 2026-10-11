@@ -18,7 +18,7 @@ const DEFAULT_PROVIDERS = { metal: metalProviders, crypto: cryptoProviders, curr
 export async function fetchLivePrices(refs = {}, { providers = DEFAULT_PROVIDERS, deadlineMs = 0 } = {}) {
   const guard = (ref, max) => (d) => !ref || Math.abs(d.v / ref - 1) <= max;
   const jobs = [
-    ...ASSETS.map((a) => {
+    ...ASSETS.filter((a) => a.symbol !== 'USD').map((a) => {
       if (a.kind === 'metal') return [a.symbol, providers.metal(a.symbol), JUMP.metal];
       if (a.kind === 'fx') return [a.symbol, providers.currency(a.symbol), JUMP.fx];
       return [a.symbol, providers.crypto(a.symbol), JUMP.crypto];

@@ -12,7 +12,7 @@ import {
   SCORING_VERSION,
   FACTORS,
 } from './scoring.js';
-import { ASSETS } from './assets.js';
+import { ASSETS, isDollar } from './assets.js';
 import { isUsable } from './datum.js';
 import { unitUsdSeries, tradingDate } from './market.js';
 import { normalize, merge } from './series.js';
@@ -93,8 +93,11 @@ export function analyzeMarket(market, series, { news = {} } = {}) {
   for (const asset of ASSETS) {
     const m = market.assets?.[asset.id];
     if (!m) continue;
-    const closed = normalize(unitUsdSeries(asset, series));
-    const live = m.usd;
+    // Dolar'ın analizi Dolar/TL kuru üzerinden yapılır (dolar fiyatı her zaman 1'dir);
+    // bu yüzden "Dolar/TL trendi" göstergesi Dolar için ayrıca kullanılmaz.
+    const dollar = isDollar(asset);
+    const closed = normalize(dollar ? series.USDTRY || [] : unitUsdSeries(asset, series));
+    const live = dollar ? m.try : m.usd;
     let points = closed;
     if (isUsable(live)) {
       const day = tradingDate(asset.kind, new Date(live.asOf).getTime());
@@ -105,7 +108,7 @@ export function analyzeMarket(market, series, { news = {} } = {}) {
     m.analysis = analyzeAsset({
       asset,
       points,
-      fxPoints: normalize(series.USDTRY || []),
+      fxPoints: dollar ? [] : normalize(series.USDTRY || []),
       stale: !isUsable(live) || live.st === 'stale',
       news: news[asset.id] || null,
       backtest,

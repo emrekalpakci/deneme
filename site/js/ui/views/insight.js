@@ -3,6 +3,7 @@
 import { h } from '../dom.js';
 import { formatUsd, formatPercent, formatDecimal, decFromNumber } from '../../core/money.js';
 import { RULES, LABELS } from '../../core/scoring.js';
+import { isDollar, priceDecimals } from '../../core/assets.js';
 
 const p1 = (x) => (x === null || x === undefined ? '—' : formatPercent(decFromNumber(x * 100).round(1), 1));
 const signed = (x) => (x === null || x === undefined ? '—' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(Math.round(x))}`);
@@ -10,11 +11,17 @@ const signed = (x) => (x === null || x === undefined ? '—' : `${x > 0 ? '+' : 
 const LABEL_CLASS = { buy: 'label-buy', wait: 'label-wait', expensive: 'label-expensive', none: 'label-none' };
 
 function factorValue(id, raw, asset) {
-  if (!raw) return id === 'news' ? '5. adımda eklenecek' : 'veri yok';
+  if (!raw) {
+    if (id === 'fx' && isDollar(asset)) return 'Dolar için kullanılmaz (analiz zaten kurun kendisi)';
+    return id === 'news' ? 'yeterli haber yok' : 'veri yok';
+  }
   const unit = asset.kind === 'metal' ? '/g' : '';
+  const dp = priceDecimals(asset);
+  // Dolar'ın analiz fiyatı TL'dir (Dolar/TL kuru); diğerleri dolar fiyatıdır.
+  const money = (v) => (isDollar(asset) ? `${formatDecimal(String(v.toFixed(dp)), dp)} TL` : formatUsd(String(v.toFixed(dp)), dp));
   switch (id) {
     case 'trend':
-      return `Fiyat ${formatUsd(String(raw.price.toFixed(2)))}${unit} · 50G ${formatUsd(String(raw.ma50.toFixed(2)))} · 200G ${formatUsd(String(raw.ma200.toFixed(2)))}`;
+      return `Fiyat ${money(raw.price)}${unit} · 50G ${money(raw.ma50)} · 200G ${money(raw.ma200)}`;
     case 'rsi':
       return `RSI ${formatDecimal(String(raw.rsi.toFixed(1)), 1)}`;
     case 'peak':
@@ -82,7 +89,7 @@ function breakdown(asset, m, ctx) {
       h('li', {}, `"${LABELS.expensive}": RSI ve zirve puanlarının ortalaması ${RULES.expensiveMax} veya altı.`),
       h('li', {}, `"${LABELS.buy}": toplam puan +${RULES.buyMin} veya üstü ve trend olumsuz değil.`),
       h('li', {}, `"${LABELS.none}": göstergelerin %${RULES.minWeight * 100}'inden azı hesaplanabildiyse ya da fiyat güncel değilse.`),
-      h('li', {}, 'Diğer durumlarda "Bekle". Göstergeler varlığın dolar fiyatıyla hesaplanır; Dolar/TL etkisi ayrı bir göstergedir.'),
+      h('li', {}, 'Diğer durumlarda "Bekle". Göstergeler varlığın dolar fiyatıyla hesaplanır; Dolar/TL etkisi ayrı bir göstergedir. Dolar\'ın kendisi için göstergeler Dolar/TL kuruyla hesaplanır.'),
     ),
     backtestMini(an, m.backtest),
     h('p', { class: 'meta' }, h('a', { href: '#/test' }, 'Stratejinin geçmiş veri testinin tamamı ›')),

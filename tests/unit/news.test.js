@@ -50,7 +50,7 @@ test('windows-1254 kodlu akış doğru okunur', () => {
 test('varlık etiketleme: mecaz ve "altında" tuzakları', () => {
   assert.deepEqual(tagAssets('Gram altın rekor kırdı'), ['gram-altin']);
   assert.deepEqual(tagAssets('Altın 4.000 doların altında'), ['gram-altin']);
-  assert.deepEqual(tagAssets('Dolar 49 liranın altında kaldı'), []);
+  assert.deepEqual(tagAssets('Dolar 49 liranın altında kaldı'), ['dolar'], '"altında" altın sayılmaz; haber Dolar haberidir');
   assert.deepEqual(tagAssets('Şehrin altın çocuğu yarışmaya gidiyor'), [], 'ekonomi bağlamı yoksa altın sayılmaz');
   assert.deepEqual(tagAssets('Gümüş madalya kazandı'), []);
   assert.deepEqual(tagAssets('Gold steadies near $4,200'), ['gram-altin']);

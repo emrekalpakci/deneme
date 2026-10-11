@@ -13,6 +13,33 @@ export const GRAMS_PER_TROY_OUNCE = '31.1035';
 
 export const ASSETS = Object.freeze([
   {
+    // Dolar: fiyatı doğrudan Dolar/TL kurudur; analizi TL fiyatı (kur) üzerinden yapılır.
+    id: 'dolar',
+    name: 'Dolar',
+    shortName: 'Dolar',
+    kind: 'fx',
+    symbol: 'USD',
+    unit: 'dolar',
+    unitLabel: '$',
+    qtyDecimals: 2,
+    priceDecimals: 4,
+    qtyExample: '500',
+    defaults: { tp: '10', sl: '5' },
+  },
+  {
+    id: 'euro',
+    name: 'Euro',
+    shortName: 'Euro',
+    kind: 'fx',
+    symbol: 'EUR',
+    unit: 'euro',
+    unitLabel: '€',
+    qtyDecimals: 2,
+    priceDecimals: 4,
+    qtyExample: '500',
+    defaults: { tp: '10', sl: '5' },
+  },
+  {
     id: 'gram-altin',
     name: 'Gram Altın',
     shortName: 'Altın',
@@ -56,19 +83,6 @@ export const ASSETS = Object.freeze([
     qtyDecimals: 8,
     defaults: { tp: '30', sl: '15' },
   },
-  {
-    id: 'euro',
-    name: 'Euro',
-    shortName: 'Euro',
-    kind: 'fx',
-    symbol: 'EUR',
-    unit: 'euro',
-    unitLabel: '€',
-    qtyDecimals: 2,
-    priceDecimals: 4,
-    qtyExample: '500',
-    defaults: { tp: '10', sl: '5' },
-  },
 ]);
 
 export const METAL_NOTE = 'Hesaplanan fiyat; kuyumcu ve banka fiyatından farklı olabilir.';
@@ -80,6 +94,9 @@ export function getAsset(id) {
 export const metals = () => ASSETS.filter((a) => a.kind === 'metal');
 export const cryptos = () => ASSETS.filter((a) => a.kind === 'crypto');
 export const currencies = () => ASSETS.filter((a) => a.kind === 'fx');
+
+/** Dolar'ın kendisi: dolar fiyatı her zaman 1'dir, TL fiyatı Dolar/TL kurudur. */
+export const isDollar = (asset) => asset?.symbol === 'USD';
 
 /** Fiyat gösterim hanesi: döviz 4 hane (49,2706 TL), diğerleri 2 hane. */
 export const priceDecimals = (asset) => asset?.priceDecimals ?? 2;

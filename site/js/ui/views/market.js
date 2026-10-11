@@ -4,7 +4,7 @@ import { h } from '../dom.js';
 import { sparkline } from '../chart.js';
 import { formatWhen, formatAge, formatDay } from '../format.js';
 import { formatTry, formatUsd, formatPercent, formatDecimal } from '../../core/money.js';
-import { ASSETS, METAL_NOTE, priceDecimals } from '../../core/assets.js';
+import { ASSETS, METAL_NOTE, priceDecimals, isDollar } from '../../core/assets.js';
 import { isUsable } from '../../core/datum.js';
 import { insightBox } from './insight.js';
 
@@ -24,7 +24,8 @@ export function renderMarket(state) {
       `Otomatik güncelleme: ${formatWhen(market.generatedAt, now)} (${formatAge(market.generatedAt, now)}). `,
       'Veriler 30 dakikada bir yenilenir; uygulama açıkken ons ve kripto fiyatları dakikada bir yenilenir. Analiz, otomatik güncellemedeki fiyatla yapılır.',
     ),
-    fxCard(fx, now),
+    // Dolar/TL kuru, "Dolar" varlık kartında (analiziyle birlikte) gösterilir.
+    ASSETS.some(isDollar) ? null : fxCard(fx, now),
     ASSETS.map((a) => assetCard(a, market.assets?.[a.id], fx, now)),
     h('p', { class: 'disclaimer' }, DISCLAIMER),
   );
@@ -90,21 +91,23 @@ function assetCard(asset, a, fx, now) {
   const dp = priceDecimals(asset);
   const unitWord = metal ? 'gram' : fxKind ? `1 ${asset.unitLabel}` : '1 adet';
   const children = [
-    h('div', { class: 'asset-head' }, h('h2', {}, asset.name), statusPill(metal ? a.ounceUsd : usd, { marketOpen: a.marketOpen, live: a.live, now })),
+    h('div', { class: 'asset-head' }, h('h2', {}, isDollar(asset) ? 'Dolar ($)' : asset.name), statusPill(metal ? a.ounceUsd : isDollar(asset) ? tl : usd, { marketOpen: a.marketOpen, live: a.live, now })),
   ];
 
   if (isUsable(tl)) {
     children.push(h('div', { class: 'price-main', 'aria-label': `${asset.name} ${unitWord} fiyatı` }, formatTry(String(tl.v), dp)));
     children.push(changeLine(a.change?.tryPct, 'önceki kapanışa göre (TL)'));
   } else {
-    const why = isUsable(usd) ? 'Dolar/TL kuru alınamadığı için TL fiyatı hesaplanamadı.' : 'Bu varlığın fiyatı şu an alınamadı.';
+    const why = isDollar(asset)
+      ? 'Dolar/TL kuru şu an alınamadı. Bu yüzden TL fiyatları gösterilemiyor.'
+      : isUsable(usd) ? 'Dolar/TL kuru alınamadığı için TL fiyatı hesaplanamadı.' : 'Bu varlığın fiyatı şu an alınamadı.';
     children.push(h('p', { class: 'unavailable' }, why));
   }
 
   const usdPct = a.change?.usdPct !== null && a.change?.usdPct !== undefined ? ` (${formatPercent(String(a.change.usdPct), 2, { signed: true })})` : '';
   if (isUsable(usd) && metal) {
     children.push(h('div', { class: 'price-sub' }, `${formatUsd(String(usd.v))} / gram · Ons ${formatUsd(String(a.ounceUsd.v))}`, usdPct ? `${usdPct} USD` : ''));
-  } else if (isUsable(usd)) {
+  } else if (isUsable(usd) && !isDollar(asset)) {
     // Kripto ve dövizde dolar fiyatı da büyük gösterilir.
     children.push(
       h(
@@ -126,11 +129,12 @@ function assetCard(asset, a, fx, now) {
     h(
       'div',
       { class: 'meta' },
-      sourceLine(metal ? 'Ons fiyatı' : fxKind ? 'Euro/Dolar' : 'Fiyat', metal ? a.ounceUsd : usd, now, a.live ? true : a.marketOpen),
-      isUsable(fx) && isUsable(usd) ? sourceLine('Dolar/TL', fx, now, fx.marketOpen) : null,
+      isDollar(asset) ? null : sourceLine(metal ? 'Ons fiyatı' : fxKind ? 'Euro/Dolar' : 'Fiyat', metal ? a.ounceUsd : usd, now, a.live ? true : a.marketOpen),
+      isDollar(asset) || (isUsable(fx) && isUsable(usd)) ? sourceLine('Dolar/TL', fx, now, fx?.marketOpen) : null,
     ),
   );
   if (metal) children.push(h('div', { class: 'note' }, `ⓘ ${METAL_NOTE} Formül: ons × Dolar/TL ÷ 31,1035.`));
-  if (fxKind) children.push(h('div', { class: 'note' }, 'ⓘ Hesaplanan kur: Euro/Dolar paritesi × Dolar/TL. Banka ve döviz bürosu alış-satış fiyatları farklıdır.'));
+  if (fxKind && !isDollar(asset)) children.push(h('div', { class: 'note' }, 'ⓘ Hesaplanan kur: Euro/Dolar paritesi × Dolar/TL. Banka ve döviz bürosu alış-satış fiyatları farklıdır.'));
+  if (isDollar(asset)) children.push(h('div', { class: 'note' }, 'ⓘ Piyasa kuru. Banka ve döviz bürosu alış-satış fiyatları farklıdır.'));
   return h('section', { class: 'card', 'aria-label': asset.name }, children);
 }

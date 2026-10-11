@@ -342,6 +342,8 @@ function renderForm(ctx, portfolio) {
     rerender();
   };
 
+  const unitName = a.kind === 'metal' ? 'gram' : a.unitLabel;
+  if (a.symbol === 'USD' && f.mode === 'usd') f.mode = 'unit';
   const unitHint = a.kind === 'metal' ? 'gram olarak (ör. 2,5)' : `${a.unitLabel} olarak (ör. ${a.qtyExample || '0,0015'})`;
   const form = h(
     'section',
@@ -362,15 +364,16 @@ function renderForm(ctx, portfolio) {
       ),
     ),
     text('qty', 'Miktar', { hint: unitHint }),
-    h('span', { class: 'field-label' }, 'Fiyatı nasıl gireceksin?'),
+    h('span', { class: 'field-label' }, f.type === 'sell' ? 'Kaça sattın?' : 'Kaça aldın?'),
+    h('p', { class: 'meta' }, 'Elindeki bilgiye göre birini seç: tek birimin fiyatını ya da toplam tuttuğu parayı yazabilirsin. Uygulama diğerini kendisi hesaplar.'),
     seg('mode', [
-      ['unit', 'Birim fiyat (TL)'],
-      ['total', 'Toplam tutar (TL)'],
-      ['usd', 'Birim fiyat (USD)'],
+      ['unit', `1 ${unitName} fiyatı`],
+      ['total', f.type === 'sell' ? 'Toplam aldığım' : 'Toplam ödediğim'],
+      ...(a.symbol === 'USD' ? [] : [['usd', `1 ${unitName} fiyatı ($)`]]),
     ]),
-    f.mode === 'unit' ? text('price', `1 ${a.kind === 'metal' ? 'gram' : a.unitLabel} fiyatı (TL)`, { hint: 'Ör. 4.512,30' }) : null,
-    f.mode === 'total' ? text('total', 'Ödediğin / aldığın toplam tutar (TL, komisyon hariç)', { hint: 'Ör. 16.500' }) : null,
-    f.mode === 'usd' ? text('usd', `1 ${a.kind === 'metal' ? 'gram' : a.unitLabel} fiyatı (USD)`) : null,
+    f.mode === 'unit' ? text('price', `1 ${unitName} fiyatı (TL)`, { hint: a.kind === 'fx' ? 'Ör. 49,35' : 'Ör. 4.512,30' }) : null,
+    f.mode === 'total' ? text('total', f.type === 'sell' ? 'Satıştan aldığın toplam tutar (TL, komisyon hariç)' : 'Ödediğin toplam tutar (TL, komisyon hariç)', { hint: 'Ör. 16.500' }) : null,
+    f.mode === 'usd' ? text('usd', `1 ${unitName} fiyatı (USD)`) : null,
     f.mode === 'usd' ? text('fx', 'Dolar/TL kuru', { hint: f.fxNote || 'O günün kuru' }) : null,
     text('date', 'Tarih', { type: 'date', inputmode: 'none', max: todayTr() }),
     text('fee', 'Komisyon (TL)', { hint: 'Yoksa 0 bırak' }),
