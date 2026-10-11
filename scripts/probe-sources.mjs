@@ -111,7 +111,8 @@ async function probe(id, url) {
   const ct = res.headers?.get('content-type') || '';
   const cors = res.headers?.get('access-control-allow-origin') || '-';
   const ext = extOf(ct, res.text);
-  if (res.text) await writeFile(new URL(`${id}.${ext}`, OUT), res.text.slice(0, 400_000));
+  // Haber akışlarının metni (telif) dala kaydedilmez; sadece fiyat yanıtları test örneği olarak saklanır.
+  if (res.text && !id.startsWith('rss_')) await writeFile(new URL(`${id}.${ext}`, OUT), res.text.slice(0, 400_000));
   return { id, url, ok: res.ok, status: res.status, ms: res.ms, ua, cors, ct, bytes: res.text.length, error: res.error, preview: preview(res.text) };
 }
 
