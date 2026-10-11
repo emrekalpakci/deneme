@@ -117,3 +117,18 @@ test('geçmiş yoksa değişim ve grafik boş kalır', () => {
   assert.equal(gold.change.usdPct, null);
   assert.equal(gold.spark.try.length, 1, 'sadece bugünkü canlı fiyat');
 });
+
+test('tarayıcıdaki canlı fiyat: TL yeniden hesaplanır, doğrulanmamış sıçrama yok sayılır', async () => {
+  const { applyLivePrices } = await import('../../site/js/core/market.js');
+  const m = buildMarket({ now: TUESDAY, live: liveAt(TUESDAY), history });
+  const t = new Date(TUESDAY).toISOString();
+  const out = applyLivePrices(m, { XAU: okDatum(4250, t, 'gold-api.com'), BTC: okDatum(200000, t, 'Coinbase') }, TUESDAY);
+  const gold = out.assets['gram-altin'];
+  assert.equal(gold.ounceUsd.v, 4250);
+  assert.equal(gold.try.v, new Big('4250').times('49.27').div('31.1035').round(4).toNumber());
+  assert.ok(gold.live, 'canlı işaretlenir');
+  assert.equal(gold.spark.try.at(-1), gold.try.v, 'grafiğin son noktası canlı fiyat');
+  assert.equal(out.assets.btc.usd.v, 82900, '%140 sıçrama doğrulanmadığı için yok sayılır');
+  assert.equal(out.assets.btc.live, undefined);
+  assert.equal(m.assets['gram-altin'].ounceUsd.v, 4195.6, 'asıl özet değişmez');
+});

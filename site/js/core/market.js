@@ -149,3 +149,49 @@ function buildAsset(asset, { now, live, history, fxLive, fxHist }) {
 }
 
 export { ST, combine };
+
+const LIVE_JUMP = { metal: 0.15, crypto: 0.3 };
+
+/**
+ * Tarayıcıda anlık alınan fiyatları (ons/kripto USD) piyasa özetine uygular.
+ * Kur, özetteki kurdur. Kayıtlı fiyattan çok farklı (doğrulanmamış) anlık fiyat yok sayılır.
+ */
+export function applyLivePrices(market, live, now = Date.now()) {
+  const out = structuredClone(market);
+  const fx = out.fx?.USDTRY;
+  for (const asset of ASSETS) {
+    const d = live?.[asset.symbol];
+    const a = out.assets?.[asset.id];
+    if (!a || !isUsable(d)) continue;
+    const ref = asset.kind === 'metal' ? a.ounceUsd : a.usd;
+    if (isUsable(ref) && Math.abs(d.v / ref.v - 1) > LIVE_JUMP[asset.kind]) continue;
+    let usd;
+    let tl;
+    if (asset.kind === 'metal') {
+      a.ounceUsd = d;
+      usd = gramUsdFromOunce(d);
+      tl = gramTryFromOunce(d, fx);
+    } else {
+      usd = d;
+      tl = usdToTry(d, fx);
+    }
+    if (isUsable(usd)) usd.src = d.src;
+    if (isUsable(tl)) tl.src = `${d.src} × ${fx?.src}`;
+    a.usd = usd;
+    a.try = tl;
+    a.change = {
+      usdPct: isUsable(usd) && a.prevClose?.usd ? pct(usd.v, a.prevClose.usd) : null,
+      tryPct: isUsable(tl) && a.prevClose?.try ? pct(tl.v, a.prevClose.try) : null,
+    };
+    a.live = { at: d.asOf };
+    const day = tradingDate(asset.kind, now);
+    if (isUsable(tl) && a.spark?.days) {
+      if (a.spark.days.at(-1) === day) a.spark.try[a.spark.try.length - 1] = tl.v;
+      else {
+        a.spark.days.push(day);
+        a.spark.try.push(tl.v);
+      }
+    }
+  }
+  return out;
+}

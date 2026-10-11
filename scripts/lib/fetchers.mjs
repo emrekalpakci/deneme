@@ -4,7 +4,7 @@
 import { httpGet } from './http.mjs';
 import * as S from '../../site/js/core/sources.js';
 import { unavailable, isUsable } from '../../site/js/core/datum.js';
-import { normalize, addDays } from '../../site/js/core/series.js';
+import { normalize } from '../../site/js/core/series.js';
 
 const FRANKFURTER = 'https://api.frankfurter.dev';
 
@@ -132,20 +132,21 @@ export async function frankfurterV1UsdTry(from) {
   return r.ok ? { points: S.parseFrankfurterV1Series(r.data, 'TRY'), ms: r.ms } : { points: [], why: r.why, ms: r.ms };
 }
 
-/** Bitstamp günlük kapanışlar; 1000'lik sayfalarla ileri doğru çeker. */
+/**
+ * Bitstamp günlük kapanışlar. Her istek [start, start + 1000 gün] penceresini döner
+ * (parite o tarihte yoksa pencere kısmen boştur), bu yüzden pencereler bugüne kadar kaydırılır.
+ */
 export async function bitstampHistory(symbol, from) {
   const pair = `${symbol.toLowerCase()}usd`;
+  const WINDOW = 1000 * 86400;
+  const nowSec = Math.floor(Date.now() / 1000);
   let start = Math.floor(new Date(`${from}T00:00:00Z`).getTime() / 1000);
   const all = [];
-  for (let page = 0; page < 8; page++) {
+  for (let page = 0; page < 12 && start <= nowSec; page++) {
     const r = await get(`https://www.bitstamp.net/api/v2/ohlc/${pair}/?step=86400&limit=1000&start=${start}`);
     if (!r.ok) return { points: normalize(all), why: r.why };
-    const pts = S.parseBitstampOhlc(r.data);
-    if (!pts.length) break;
-    all.push(...pts);
-    const last = pts[pts.length - 1][0];
-    if (pts.length < 1000) break;
-    start = Math.floor(new Date(`${addDays(last, 1)}T00:00:00Z`).getTime() / 1000);
+    all.push(...S.parseBitstampOhlc(r.data));
+    start += WINDOW;
   }
   return { points: normalize(all) };
 }

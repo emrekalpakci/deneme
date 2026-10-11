@@ -204,6 +204,14 @@ main {
   overflow-wrap: anywhere;
 }
 
+.price-main.small {
+  font-size: 1.6rem;
+}
+
+.updated-line {
+  margin: 4px 4px 10px;
+}
+
 .price-sub {
   color: var(--muted);
   font-size: 0.95rem;

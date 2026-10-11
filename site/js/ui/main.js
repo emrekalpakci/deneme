@@ -1,0 +1,136 @@
+// Uygulamanın başlangıcı: tema, sekmeler, veri yükleme, canlı fiyat ve çevrimdışı uyarısı.
+
+import { h, clear } from './dom.js';
+import { load, save } from './store.js';
+import { loadMarket, fetchLivePrices } from './data.js';
+import { applyLivePrices } from '../core/market.js';
+import { formatWhen, ageHours } from './format.js';
+import { renderMarket } from './views/market.js';
+import { renderStatus } from './views/status.js';
+import { renderMore, renderSettings, renderAbout, renderComingSoon } from './views/more.js';
+
+const BUILD_ID = document.documentElement.dataset.build || '';
+
+const state = {
+  market: null, // kayıtlı piyasa özeti (market.json)
+  live: null, // tarayıcıda alınan anlık fiyatlar
+  fromCache: false,
+  error: null,
+  now: Date.now(),
+  theme: load('theme', 'auto'),
+  buildId: BUILD_ID.startsWith('__') ? 'geliştirme' : BUILD_ID,
+};
+
+// --- Tema -------------------------------------------------------------------
+function applyTheme(theme) {
+  if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+}
+function setTheme(theme) {
+  state.theme = theme;
+  save('theme', theme);
+  applyTheme(theme);
+  render();
+}
+applyTheme(state.theme);
+
+// --- Yönlendirme ------------------------------------------------------------
+const ROUTES = {
+  piyasa: () => renderMarket(viewState()),
+  portfoy: () => renderComingSoon('Portföy', 2, 'Alımlarını girip ortalama maliyet ve kâr/zararını görebileceksin.'),
+  butce: () => renderComingSoon('Bütçe planlayıcı', 3, 'Bütçene, vadene ve risk tercihine göre dağılım önerisi.'),
+  haberler: () => renderComingSoon('Haberler', 5, 'RSS haber başlıkları ve olumlu/olumsuz puanı.'),
+  daha: () => renderMore(),
+  durum: () => renderStatus(viewState()),
+  ayarlar: () => renderSettings({ theme: state.theme, setTheme }),
+  sozluk: () => renderComingSoon('Sözlük', 5),
+  hakkinda: () => renderAbout(),
+};
+const TAB_OF = { durum: 'daha', ayarlar: 'daha', sozluk: 'daha', hakkinda: 'daha' };
+
+function currentRoute() {
+  const r = location.hash.replace(/^#\/?/, '').split('?')[0];
+  return ROUTES[r] ? r : 'piyasa';
+}
+
+function viewState() {
+  const market = state.market && state.live ? applyLivePrices(state.market, state.live, state.now) : state.market;
+  return { ...state, market, reload: refresh };
+}
+
+function render() {
+  state.now = Date.now();
+  const route = currentRoute();
+  const tab = TAB_OF[route] || route;
+  for (const a of document.querySelectorAll('.tabbar a')) {
+    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  }
+  const view = document.getElementById('view');
+  clear(view).appendChild(ROUTES[route]());
+  renderBanner();
+}
+
+// --- Uyarı bandı (çevrimdışı / eski veri) -----------------------------------
+function renderBanner() {
+  const el = document.getElementById('banner');
+  let msg = '';
+  let error = false;
+  if (!state.market && state.error) {
+    msg = `Veriler yüklenemedi: ${state.error}.`;
+    error = true;
+  } else if (state.fromCache) {
+    msg = `${state.error || 'Bağlantı sorunu'}. Son kayıtlı veriler gösteriliyor (güncelleme: ${formatWhen(state.market?.generatedAt, state.now)}).`;
+  } else if (state.market && ageHours(state.market.generatedAt, state.now) > 1.5) {
+    msg = `Veriler ${formatWhen(state.market.generatedAt, state.now)} saatinden beri güncellenmedi. Ayrıntı: Daha fazla → Durum.`;
+  }
+  el.hidden = !msg;
+  el.className = error ? 'banner error' : 'banner';
+  el.textContent = msg;
+}
+
+// --- Veri -------------------------------------------------------------------
+async function refresh({ forceLive = false } = {}) {
+  const r = await loadMarket();
+  state.market = r.data;
+  state.fromCache = r.fromCache;
+  state.error = r.error;
+  render();
+  if (state.market && !state.fromCache) await refreshLive(forceLive);
+}
+
+async function refreshLive(force = false) {
+  try {
+    const prices = await fetchLivePrices(state.market, { force });
+    if (prices) state.live = prices;
+  } catch {
+    /* canlı fiyat alınamazsa kayıtlı veri gösterilmeye devam eder */
+  }
+  render();
+}
+
+document.getElementById('refresh').addEventListener('click', () => refresh({ forceLive: true }));
+window.addEventListener('hashchange', () => {
+  render();
+  document.getElementById('view').focus({ preventScroll: true });
+  window.scrollTo(0, 0);
+});
+window.addEventListener('online', () => refresh());
+window.addEventListener('offline', () => {
+  state.fromCache = !!state.market;
+  state.error = 'İnternet bağlantısı yok';
+  render();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refresh();
+});
+setInterval(() => {
+  if (document.visibilityState === 'visible' && navigator.onLine !== false) refreshLive();
+}, 60_000);
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+document.getElementById('view').appendChild(h('p', { class: 'placeholder' }, 'Yükleniyor…'));
+refresh();
